@@ -2,64 +2,148 @@ const hre = require("hardhat");
 
 
 async function main() {
-    const accounts = await hre.ethers.getSigners()
-    const testAccount1 = accounts[0];
-    
-    const ArithmeticTest = await hre.ethers.getContractFactory("ArithmeticTest")
-    const arithmeticTest = await ArithmeticTest.deploy()
-    
-    // deploy the contract
-    await arithmeticTest.deployed();
+    const argv = process.argv.slice(2)
+    // if the contract should not be redeployed, the command line arguments need at least a contract address
+    if (argv.length == 0) {
+        console.log("No deploy statement or contract address has been provided");
+        return
+    }
 
-    console.log(`ArithmeticTest successfully deployed to ${arithmeticTest.address}`);
-  
+    // load the contract
+    const arithmeticTest = await loadContract(argv[0], "ArithmeticTest");
 
-    // listen to the event trigger which
-    arithmeticTest.on("Successful", (number) => {
-        console.log(`onlyOwnerTestSol successful: ${number}`);
-    });
 
-    const a = 6;
-    const b = 3;
+
+    // ### ADDITION ###
 
     // test the Sol add method
-    console.log("###\nAdd Solidity ...")
-    let transactionSol = await arithmeticTest.addSol(a, b)
+    console.log("Add Solidity ...")
+    let transactionSol = await arithmeticTest.addSol(6, 3)
     // log gas costs
     let receiptSol = await transactionSol.wait()
-    let gasUsedSol = BigInt(receiptSol.cumulativeGasUsed) * BigInt(receiptSol.effectiveGasPrice);
+    let gasUsedSol = receiptSol.cumulativeGasUsed;
     
     console.log(`... done. Gas used: ${gasUsedSol}`)
-
 
     // test the Yul add method
-    console.log("\n\n###\nAdd Yul ...")
-    let transactionYul = await onlyOwnerTestYul.addYul(a, b)
+    console.log("\nAdd Yul ...")
+    let transactionYul = await arithmeticTest.addYul(6, 3)
     // log gas costs
     let receiptYul = await transactionYul.wait()
-    let gasUsedYul = BigInt(receiptYul.cumulativeGasUsed) * BigInt(receiptYul.effectiveGasPrice);
+    let gasUsedYul = receiptYul.cumulativeGasUsed;
     
     console.log(`... done. Gas used: ${gasUsedYul}`)
 
+    console.log(`\nYul saved ${calculateGasSavings(gasUsedSol, gasUsedYul)}% gas.`)
 
-    // test the Sol method
-    console.log("###\nSub Solidity ...")
-    transactionSol = await addTest.subSol(a, b)
+
+    
+    // ### SUBTRACTION ###
+
+    // test the Sol sub method
+    console.log("\n\nSub Solidity ...")
+    transactionSol = await arithmeticTest.subSol(6, 3)
     // log gas costs
     receiptSol = await transactionSol.wait()
-    gasUsedSol = BigInt(receiptSol.cumulativeGasUsed) * BigInt(receiptSol.effectiveGasPrice);
+    gasUsedSol = receiptSol.cumulativeGasUsed;
     
     console.log(`... done. Gas used: ${gasUsedSol}`)
 
-
-    // test the Yul method
-    console.log("\n\n###\nSub Yul ...")
-    transactionYul = await onlyOwnerTestYul.subYul(a, b)
+    
+    // test the Yul sub method
+    console.log("\nSub Yul ...")
+    transactionYul = await arithmeticTest.subYul(6, 3)
     // log gas costs
     receiptYul = await transactionYul.wait()
-    gasUsedYul = BigInt(receiptYul.cumulativeGasUsed) * BigInt(receiptYul.effectiveGasPrice);
+    gasUsedYul = receiptYul.cumulativeGasUsed;
     
     console.log(`... done. Gas used: ${gasUsedYul}`)
+
+    console.log(`\nYul saved ${calculateGasSavings(gasUsedSol, gasUsedYul)}% gas.`)
+    
+
+
+    // ### MULTIPLICATION ###
+
+    // test the Sol mul method
+    console.log("\n\nMul Solidity ...")
+    transactionSol = await arithmeticTest.mulSol(6, 3)
+    // log gas costs
+    receiptSol = await transactionSol.wait()
+    gasUsedSol = receiptSol.cumulativeGasUsed;
+    
+    console.log(`... done. Gas used: ${gasUsedSol}`)
+
+    
+    // test the Yul mul method
+    console.log("\nMul Yul ...")
+    transactionYul = await arithmeticTest.mulYul(6, 3)
+    // log gas costs
+    receiptYul = await transactionYul.wait()
+    gasUsedYul = receiptYul.cumulativeGasUsed;
+    
+    console.log(`... done. Gas used: ${gasUsedYul}`)
+
+    console.log(`\nYul saved ${calculateGasSavings(gasUsedSol, gasUsedYul)}% gas.`)
+
+
+
+    // ### DIVISION ###
+
+    // test the Sol div method
+    console.log("\n\nDiv Solidity ...")
+    transactionSol = await arithmeticTest.divSol(6, 3)
+    // log gas costs
+    receiptSol = await transactionSol.wait()
+    gasUsedSol = receiptSol.cumulativeGasUsed;
+    
+    console.log(`... done. Gas used: ${gasUsedSol}`)
+
+    
+    // test the Yul div method
+    console.log("\nDiv Yul ...")
+    transactionYul = await arithmeticTest.divYul(6, 3)
+    // log gas costs
+    receiptYul = await transactionYul.wait()
+    gasUsedYul = receiptYul.cumulativeGasUsed;
+    
+    console.log(`... done. Gas used: ${gasUsedYul}`)
+
+    console.log(`\nYul saved ${calculateGasSavings(gasUsedSol, gasUsedYul)}% gas.`)
+}
+
+
+async function loadContract(argv, abi) {
+    // check the command line arguments whether the contract should be redeployed or not
+    if (argv.toString() == "deploy" || argv.toString() == "--deploy" || argv.toString() == "d") {
+        // get the abi of the contract and deploy it
+        const ArithmeticTest = await hre.ethers.getContractFactory(abi)
+        const arithmeticTest = await ArithmeticTest.deploy()
+
+        await arithmeticTest.deployed();
+        console.log(`${abi} successfully deployed to ${arithmeticTest.address}`);
+
+        return arithmeticTest;
+
+    } else {
+        // get all signed accounts in the network and choose the first test account
+        const accounts = await hre.ethers.getSigners()
+        const testAccount1 = accounts[0];
+
+        // load the specified account
+        const arithmeticTest = await hre.ethers.getContractAt(abi, argv.toString(), testAccount1)
+        
+        return arithmeticTest
+    }
+}
+
+
+function calculateGasSavings(gasUsedSol, gasUsedYul) {
+    // calculate the gas savings in percent: delta * 100 / base
+    const percentage = (gasUsedSol-gasUsedYul) * 100 / gasUsedSol
+
+    // before returning the percentage, round to the two nearest decimals
+    return Math.round((percentage + Number.EPSILON) * 100) / 100
 }
 
 

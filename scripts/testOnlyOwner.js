@@ -8,32 +8,16 @@ const hre = require("hardhat");
 
 
 async function main() {
-    const accounts = await hre.ethers.getSigners()
-    const testAccount1 = accounts[0];
-    
-    const OnlyOwnerTestSol = await hre.ethers.getContractFactory("OnlyOwnerTestSol")
-    const onlyOwnerTestSol = await OnlyOwnerTestSol.deploy()
+    const argv = process.argv.slice(2)
+    // if the contract should not be redeployed, the command line arguments need at least a contract address
+    if (argv.length == 0) {
+        console.log("No deploy statement or contract address has been provided");
+        return
+    }
 
-    const OnlyOwnerTestYul = await hre.ethers.getContractFactory("OnlyOwnerTestYul")
-    const onlyOwnerTestYul = await OnlyOwnerTestYul.deploy();
-    
-    // deploy both contracts
-    await onlyOwnerTestSol.deployed();
-    await onlyOwnerTestYul.deployed();
-
-    console.log(`OnlyOwnerTestSol successfully deployed to ${onlyOwnerTestSol.address}`);
-    console.log(`OnlyOwnerTestYul successfully deployed to ${onlyOwnerTestYul.address}`);
-  
-
-    // listen to the event which logs the number 1 if the method was successful
-    onlyOwnerTestSol.on("Successful", (number) => {
-        console.log(`onlyOwnerTestSol successful: ${number}`);
-    });
-
-    // listen to the event which logs the number 1 if the method was successful
-    onlyOwnerTestYul.on("Successful", (number) => {
-        console.log(`onlyOwnerTestYul successful: ${number}`);
-    })
+    // load the contracts
+    const onlyOwnerTestSol = await loadContract(argv[0], "OnlyOwnerTestSol");
+    const onlyOwnerTestYul = await loadContract(argv[1], "OnlyOwnerTestYul")
     
 
     // test the Sol method
@@ -41,7 +25,7 @@ async function main() {
     const transactionSol = await onlyOwnerTestSol.ownerTest()
     // log gas costs
     const receiptSol = await transactionSol.wait()
-    const gasUsedSol = BigInt(receiptSol.cumulativeGasUsed) * BigInt(receiptSol.effectiveGasPrice);
+    const gasUsedSol = receiptSol.cumulativeGasUsed // * BigInt(receiptSol.effectiveGasPrice);
     
     console.log(`.. done. Gas used: ${gasUsedSol}`)
 
@@ -51,9 +35,45 @@ async function main() {
     const transactionYul = await onlyOwnerTestYul.ownerTest()
     // log gas costs
     const receiptYul = await transactionYul.wait()
-    const gasUsedYul = BigInt(receiptYul.cumulativeGasUsed) * BigInt(receiptYul.effectiveGasPrice);
+    const gasUsedYul = receiptYul.cumulativeGasUsed // * BigInt(receiptYul.effectiveGasPrice);
     
     console.log(`.. done. Gas used: ${gasUsedYul}`)
+
+    console.log(`\nYul saved ${calculateGasSavings(gasUsedSol, gasUsedYul)}% gas.`)
+}
+
+
+async function loadContract(argv, abi) {
+    // check the command line arguments whether the contract should be redeployed or not
+    if (argv.toString() == "deploy" || argv.toString() == "--deploy" || argv.toString() == "d") {
+        // get the abi of the contract and deploy it
+        const ArithmeticTest = await hre.ethers.getContractFactory(abi)
+        const arithmeticTest = await ArithmeticTest.deploy()
+
+        await arithmeticTest.deployed();
+        console.log(`${abi} successfully deployed to ${arithmeticTest.address}`);
+
+        return arithmeticTest;
+
+    } else {
+        // get all signed accounts in the network and choose the first test account
+        const accounts = await hre.ethers.getSigners()
+        const testAccount1 = accounts[0];
+
+        // load the specified account
+        const arithmeticTest = await hre.ethers.getContractAt(abi, argv.toString(), testAccount1)
+        
+        return arithmeticTest
+    }
+}
+
+
+function calculateGasSavings(gasUsedSol, gasUsedYul) {
+    // calculate the gas savings in percent: delta * 100 / base
+    const percentage = (gasUsedSol-gasUsedYul) * 100 / gasUsedSol
+
+    // before returning the percentage, round to the two nearest decimals
+    return Math.round((percentage + Number.EPSILON) * 100) / 100
 }
 
 

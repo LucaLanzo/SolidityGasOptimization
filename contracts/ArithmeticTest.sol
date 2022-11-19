@@ -3,73 +3,68 @@ pragma solidity ^0.8.17;
 
 // import "hardhat/console.sol";
 
-contract ArithmeticSol {
-    event Successful(string methodname);
+contract ArithmeticTest {
 
     // ### Addition ###
-    function addSol(uint x, uint y) public {
+    function addSol(uint x, uint y) public returns(uint) {
         uint result = x + y;
 
-        emit Successful("Sol add successful! Result");
+        return result;
     }
 
-    function addYul(uint x, uint y) public {
+    function addYul(uint x, uint y) public returns(uint) {
         assembly {
             let result := add(x, y)
-            mstore(0x0, result)
+            mstore(0x80, result)
+            return(0x80, 0x100)
         }
-
-        emit Successful("Yul add successful!");
     }
 
-
+    
     // ### Subtraction ###
-    function subSol(uint x, uint y) public {
+    function subSol(uint x, uint y) public returns(uint) {
         uint result = x - y;
 
-        emit Successful("Sol sub successful!");
+        return result;
     }
 
-    function subYul(uint x, uint y) public {
+    function subYul(uint x, uint y) public returns(uint) {
         assembly {
             let result := sub(x, y)
-            mstore(0x0, result)
+            mstore(0x80, result)
+            return(0x80, 0x100)
         }
-
-        emit Successful("Yul sub successful!");
     }
 
 
     // ### Multiplication ###
-    function mulSol(uint x, uint y) public {
+    function mulSol(uint x, uint y) public returns(uint) {
         uint result = x * y;
 
-        emit Successful("Sol mul successful!");
+        return result;
     }
 
-    function mulYul(uint x, uint y) public {
+    function mulYul(uint x, uint y) public returns(uint) {
         assembly {
             let result := mul(x, y)
-            mstore(0x0, result)
+            mstore(0x80, result)
+            return(0x80, 0x100)
         }
-
-        emit Successful("Yul mul successful!");
     }
 
 
     // ### Division ###
-    function divSol(uint x, uint y) public {
+    function divSol(uint x, uint y) public returns(uint) {
         uint result = x / y;
 
-        emit Successful("Sol div successful!");
+        return result;
     }
 
-    function divYul(uint x, uint y) public {
+    function divYul(uint x, uint y) public returns(uint) {
         assembly {
             let result := div(x, y)
-            mstore(0x0, result)
+            mstore(0x80, result)
+            return(0x80, 0x100)
         }
-
-        emit Successful("Yul div successful!");
     }
 }

@@ -6,10 +6,8 @@ pragma solidity ^0.8.17;
 contract ArithmeticTest {
 
     // ### Addition ###
-    function addSol(uint x, uint y) public returns(uint) {
-        uint result = x + y;
-
-        return result;
+    function addSol(uint x, uint y) public returns(uint result) {
+        result = x + y;
     }
 
     function addYul(uint x, uint y) public returns(uint) {
@@ -22,10 +20,8 @@ contract ArithmeticTest {
 
     
     // ### Subtraction ###
-    function subSol(uint x, uint y) public returns(uint) {
-        uint result = x - y;
-
-        return result;
+    function subSol(uint x, uint y) public returns(uint result) {
+        result = x - y;
     }
 
     function subYul(uint x, uint y) public returns(uint) {
@@ -38,10 +34,8 @@ contract ArithmeticTest {
 
 
     // ### Multiplication ###
-    function mulSol(uint x, uint y) public returns(uint) {
-        uint result = x * y;
-
-        return result;
+    function mulSol(uint x, uint y) public returns(uint result) {
+        result = x * y;
     }
 
     function mulYul(uint x, uint y) public returns(uint) {
@@ -54,15 +48,27 @@ contract ArithmeticTest {
 
 
     // ### Division ###
-    function divSol(uint x, uint y) public returns(uint) {
-        uint result = x / y;
-
-        return result;
+    function divSol(uint x, uint y) public returns(uint result) {
+        result = x / y;
     }
 
     function divYul(uint x, uint y) public returns(uint) {
         assembly {
             let result := div(x, y)
+            mstore(0x80, result)
+            return(0x80, 0x100)
+        }
+    }
+
+
+    // ### Exponentiation ###
+    function expSol(uint x, uint y) public returns(uint result) {
+        result = x ** y;
+    }
+
+    function expYul(uint x, uint y) public returns(uint) {
+        assembly {
+            let result := exp(x, y)
             mstore(0x80, result)
             return(0x80, 0x100)
         }

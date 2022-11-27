@@ -10,11 +10,11 @@ contract OnlyOwnerTestYul {
             sstore(0, caller())
         }
     }
-
+    
     function ownerTest() public {
         assembly {
             if iszero(eq(caller(), sload(0))) {
-                revert(0, 0)
+                return(0, 0)
             }
         }
     }

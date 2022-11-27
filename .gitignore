@@ -8,7 +8,4 @@ typechain-types
 #Hardhat files
 cache
 artifacts
-
-#Ganache files
-ganacheBlockExplorer
-ganacheDB
+test

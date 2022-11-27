@@ -9,20 +9,14 @@ Multiple basic operations are translated and compared from Solidity to Yul and l
 # Start the project
 
 ## Firstly, create a local blockchain
-### - Infura Endpoint is used
-### - Blockchain instance is saved locally
-### - Keys are the same on every start
+### - Infura is used to fork mainnet
+### - A hardhat node should be run locally where ...
+### - ... the keys are the same on every start
+### - ... other configurations are set in the hardhat.config.js
 ```
-npx ganache -m 'exhibit air raven loop into fetch license iron manual surround hold east' -a 2 --database.dbPath '.\ganacheDB' --fork.url wss://:b812d5c70a6d441eacd94aa8d9e28f77@mainnet.infura.io/ws/v3/8033ae5519e74bc784ea038df242d8b8
+npx hardhat compile // or 'npm run c'
+npx hardhat node // or 'npm run s'
 ```
-
-<br>
-<br>
-  
-## Now run the Ganache Block Explorer
-```
-go run router.go rpcRequestGo.go
-``` 
 
 <br>
 <br> 

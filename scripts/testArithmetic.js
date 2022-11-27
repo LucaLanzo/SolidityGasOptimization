@@ -110,30 +110,57 @@ async function main() {
     console.log(`... done. Gas used: ${gasUsedYul}`)
 
     console.log(`\nYul saved ${calculateGasSavings(gasUsedSol, gasUsedYul)}% gas.`)
+
+
+
+    // ### EXPONENTIATION ###
+
+    // test the Sol exp method
+    console.log("\n\nExp Solidity ...")
+    transactionSol = await arithmeticTest.expSol(6, 3)
+    // log gas costs
+    receiptSol = await transactionSol.wait()
+    gasUsedSol = receiptSol.cumulativeGasUsed;
+    
+    console.log(`... done. Gas used: ${gasUsedSol}`)
+
+    
+    // test the Yul exp method
+    console.log("\nExp Yul ...")
+    transactionYul = await arithmeticTest.expYul(6, 3)
+    // log gas costs
+    receiptYul = await transactionYul.wait()
+    gasUsedYul = receiptYul.cumulativeGasUsed;
+    
+    console.log(`... done. Gas used: ${gasUsedYul}`)
+
+    console.log(`\nYul saved ${calculateGasSavings(gasUsedSol, gasUsedYul)}% gas.`)
 }
 
 
 async function loadContract(argv, abi) {
+    // get all signed accounts in the network and choose the first test account
+    const accounts = await hre.ethers.getSigners()
+    const testAccount1 = accounts[0];
+
+    
     // check the command line arguments whether the contract should be redeployed or not
-    if (argv.toString() == "deploy" || argv.toString() == "--deploy" || argv.toString() == "d") {
+    if (argv.toString() == "deploy" || argv.toString() == "d") {      
         // get the abi of the contract and deploy it
-        const ArithmeticTest = await hre.ethers.getContractFactory(abi)
-        const arithmeticTest = await ArithmeticTest.deploy()
-
-        await arithmeticTest.deployed();
-        console.log(`${abi} successfully deployed to ${arithmeticTest.address}`);
-
-        return arithmeticTest;
-
-    } else {
-        // get all signed accounts in the network and choose the first test account
-        const accounts = await hre.ethers.getSigners()
-        const testAccount1 = accounts[0];
-
-        // load the specified account
-        const arithmeticTest = await hre.ethers.getContractAt(abi, argv.toString(), testAccount1)
+        const Contract = await hre.ethers.getContractFactory(abi, testAccount1)
+        const contract = await Contract.deploy()
         
-        return arithmeticTest
+        await contract.deployed();
+        await contract.deployTransaction.wait();
+
+        console.log(`${abi} successfully deployed to ${contract.address}`);
+
+        return contract;
+    } else {
+        // load the specified contract from the first test account
+        const contract = await hre.ethers.getContractAt(abi, argv.toString(), testAccount1)
+        
+        return contract;
     }
 }
 

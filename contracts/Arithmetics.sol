@@ -3,7 +3,7 @@ pragma solidity ^0.8.17;
 
 // import "hardhat/console.sol";
 
-contract ArithmeticTest {
+contract Arithmetics {
 
     // ### Addition ###
     function addSol(uint x, uint y) public returns(uint result) {

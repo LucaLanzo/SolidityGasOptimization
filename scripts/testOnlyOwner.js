@@ -16,8 +16,8 @@ async function main() {
     }
 
     // load the contracts
-    const onlyOwnerTestSol = await loadContract(argv[0], "OnlyOwnerTestSol");
-    const onlyOwnerTestYul = await loadContract(argv[1], "OnlyOwnerTestYul")
+    const onlyOwnerTestSol = await loadContract(argv[0], "OnlyOwnerSol");
+    const onlyOwnerTestYul = await loadContract(argv[1], "OnlyOwnerYul")
     
     
     // test the Sol method

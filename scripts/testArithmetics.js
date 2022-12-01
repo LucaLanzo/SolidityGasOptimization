@@ -10,7 +10,7 @@ async function main() {
     }
 
     // load the contract
-    const arithmeticTest = await loadContract(argv[0], "ArithmeticTest");
+    const arithmeticTest = await loadContract(argv[0], "Arithmetics");
 
 
 

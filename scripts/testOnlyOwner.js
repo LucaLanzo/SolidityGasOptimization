@@ -1,28 +1,26 @@
-// We require the Hardhat Runtime Environment explicitly here. This is optional
-// but useful for running the script in a standalone fashion through `node <script>`.
-//
-// You can also run a script with `npx hardhat run <script>`. If you do that, Hardhat
-// will compile your contracts, add the Hardhat Runtime Environment's members to the
-// global scope, and execute the script.
+// require the Hardhat Runtime Environment explicitly
+// optional, but useful for running script in standalone fashion through `node <script>`
 const hre = require("hardhat");
+import { loadContract, calculateGasSavings } from './scriptHelpers.js'
 
 
 async function main() {
+    
     const argv = process.argv.slice(2)
     // if the contract should not be redeployed, the command line arguments need at least a contract address
     if (argv.length < 2) {
-        console.log("No deploy statement or contract address has been provided");
+        console.log("No deploy statement or contract address has been provided.\nProvide args with 'd' to deploy or give an existing contract address.");
         return
     }
 
     // load the contracts
-    const onlyOwnerTestSol = await loadContract(argv[0], "OnlyOwnerSol");
-    const onlyOwnerTestYul = await loadContract(argv[1], "OnlyOwnerYul")
+    const onlyOwnerSol = await loadContract(argv[0], "OnlyOwnerSol", 0, 0);
+    const onlyOwnerYul = await loadContract(argv[1], "OnlyOwnerYul", 0, 1)
     
     
     // test the Sol method
     console.log("Calling empty onlyOwner solidity method ...")
-    const transactionSol = await onlyOwnerTestSol.ownerTest()
+    const transactionSol = await onlyOwnerSol.ownerTest()
     // log gas costs
     const receiptSol = await transactionSol.wait()
     const gasUsedSol = receiptSol.cumulativeGasUsed;
@@ -32,7 +30,7 @@ async function main() {
 
     // test the Yul method
     console.log("\n\nCalling empty onlyOwner yul method ...")
-    const transactionYul = await onlyOwnerTestYul.ownerTest()
+    const transactionYul = await onlyOwnerYul.ownerTest()
     // log gas costs
     const receiptYul = await transactionYul.wait()
     const gasUsedYul = receiptYul.cumulativeGasUsed;
@@ -40,42 +38,6 @@ async function main() {
     console.log(`.. done. Gas used: ${gasUsedYul}`)
 
     console.log(`\nYul saved ${calculateGasSavings(gasUsedSol, gasUsedYul)}% gas.`)
-}
-
-
-async function loadContract(argv, abi) {
-    // get all signed accounts in the network and choose the first test account
-    const accounts = await hre.ethers.getSigners()
-    const testAccount1 = accounts[0];
-
-    
-    // check the command line arguments whether the contract should be redeployed or not
-    if (argv.toString() == "deploy" || argv.toString() == "d") {      
-        // get the abi of the contract and deploy it
-        const Contract = await hre.ethers.getContractFactory(abi, testAccount1)
-        const contract = await Contract.deploy()
-        
-        await contract.deployed();
-        await contract.deployTransaction.wait();
-
-        console.log(`${abi} successfully deployed to ${contract.address}`);
-
-        return contract;
-    } else {
-        // load the specified contract from the first test account
-        const contract = await hre.ethers.getContractAt(abi, argv.toString(), testAccount1)
-        
-        return contract;
-    }
-}
-
-
-function calculateGasSavings(gasUsedSol, gasUsedYul) {
-    // calculate the gas savings in percent: delta * 100 / base
-    const percentage = (gasUsedSol-gasUsedYul) * 100 / gasUsedSol
-
-    // before returning the percentage, round to the two nearest decimals
-    return Math.round((percentage + Number.EPSILON) * 100) / 100
 }
 
 

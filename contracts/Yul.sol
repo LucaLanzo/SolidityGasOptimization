@@ -3,29 +3,18 @@ pragma solidity ^0.8.17;
 
 
 contract Yul {
-    bytes32 public changeableMessage = "Hello";
-    int256 public changeableNumber = 0;
+    string public text;
 
-    event Message(string _message);
-
-
-    function change() public {
-        
+    function test(string calldata) public {
         assembly {
-            let yulText := "This is my text"
-            let yulNumber := 1
+            // calldataload(4) loads the first 32 bytes in the call data which holds the offset (e.g. 0x60)
+            // to get to the start of the string, get the offset address at calldataload(4) and add 4 (signature skip)
+            let startOfString := add(4, calldataload(4))
 
-            sstore(changeableMessage.slot, yulText)
-            sstore(changeableNumber.slot, yulNumber)
+            // now let's get actually get the content of calldataload(4)+4 i.e. the length of the string
+            let length := calldataload(startOfString)
+
+            
         }
-    }
-
-
-    function getMessage() public view returns(bytes32) {
-        return changeableMessage;
-    }
-
-    function getNumber() public view returns(int256) {
-        return changeableNumber;
     }
 }

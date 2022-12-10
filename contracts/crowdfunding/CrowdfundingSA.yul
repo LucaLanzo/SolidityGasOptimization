@@ -3,7 +3,11 @@ object "CrowdfundingSA" {
         /* ----- constructor ----- */
         /* --- security checks --- */
         /*
-        This is how calldata is handled on external functions:
+        ################
+        ### REMINDER ###
+        ################
+        
+        calldata is handled on external functions:
 
             CALLDATA
             offsetFromSig  offset      value
@@ -23,8 +27,7 @@ object "CrowdfundingSA" {
         let _amountToRaise := calldataload(68)
         let _numberOfDaysUntilDeadline := calldataload(100)
 
-
-        But in constructors, all parameters are put into memory and then it looks like the following:
+        Whereas memory
 
             MEMORY
             offsetFromSig  value
@@ -42,66 +45,86 @@ object "CrowdfundingSA" {
             
         */
         
-        let _amountToRaise := mload(0x100) // wrong
-        // let _numberOfDaysUntilDeadline := mload(0x120) // wrong
-        
-        if iszero(gt(_amountToRaise, 0)) {
-            mstore(0x00, 30)
-            mstore(0x20, "Amount to raise smaller than 0")
-            revert(0x00, 0x40)
+        {
+            // revert if any ethereum is sent over in the constructor
+            // if callvalue() { revert(0, 0) }
+            
+            // calculate the size of the constructor arguments and programs
+            let programSize := datasize("CrowdfundingSA")
+            let argSize := sub(codesize(), programSize)
+
+            // get a new free memory pointer pointed to after the arguments
+            let newFreePtr := add(128, and(add(argSize, 31), not(31)))
+
+            // security check? -> newFreePtr > 0 or newFreePtr < 128
+            if or(gt(newFreePtr, sub(shl(64, 1), 1)), lt(newFreePtr, 128)) {
+                mstore(0, shl(224, 0x4e487b71))
+                mstore(4, 0x41)
+                revert(0, 0x24)
+            }
+
+            // store the new free pointer at 0x40 (where the free memory pointer normally points to)
+            mstore(0x40, newFreePtr)
+            // copy the arguments to memory starting after the unassignable 0x60
+            codecopy(0x80, programSize, argSize)
+
+            // if less than two 32 byte arguments are set, revert
+            if slt(argSize, 64) {
+                revert(0, 0)
+            }
+            
+            // load amountToRaise stored at 128 to 160
+            let amountToRaise := mload(128)
+            // load numberOfDaysUntilDeadline stored at 160 to 192
+            let numberOfDaysUntilDeadline := mload(160)
+
+            // if amountToRaise = 0
+            // if iszero(eq(amountToRaise, and(amountToRaise, sub(shl(128, 1), 1)))) {
+            //     revert(0, 0)
+            // }
+            
+            // save the arguments to storage
+            constructorCrowdfundingSA(amountToRaise, numberOfDaysUntilDeadline)
+            
+            // deploy the contract and save it to memory, but not at 0 like normally
+            // but rather at free memory pointer stored at 0x40 which is 0x80 + argumentSize
+            let fmp := mload(0x40)
+            let datasizeRT := datasize("runtime")
+            codecopy(fmp, dataoffset("runtime"), datasizeRT)
+            return(fmp, datasizeRT)
         }
-
-
-        /* --- store variables --- */ 
         
-        sstore(0, caller())
-        // packing of uint128 amountToRaise and uint128 state = default 0
-        sstore(1, shl(128, _amountToRaise))
-        sstore(2, add(timestamp(), mul(mload(0x120), 86400))) // a timestamp is always in seconds
-        sstore(3, timestamp())
-        // mappings = fixed at slot 4
+        function constructorCrowdfundingSA(amountToRaise, numberOfDaysUntilDeadline)
+        {
+            // same as in the inline assembly
 
-        /* --- emit event --- */
-        // Keccak256: NewProjectStarted(string,string,address,address,uint128,uint256)
-        // let signatureHash := 0x99d6a8696589d8d6e9a6ca721dffbe3aa9b2e8664eadfe8b8105f69d467d264e
-        // log1(_title, 0x40, signatureHash)
-        
-
-        /* --- contract deployment --- */
-        datacopy(0, dataoffset("runtime"), datasize("runtime"))
-        return(0, datasize("runtime"))
+            if iszero(amountToRaise)
+            {
+                mstore(0, 30)
+                mstore(0x20, "Amount to raise smaller than 0")
+                revert(0, 0x40)
+            }
+            sstore(0, caller())
+            sstore(1, shl(128, amountToRaise))
+            sstore(2, add(timestamp(), mul(numberOfDaysUntilDeadline, 86400)))
+            sstore(3, timestamp())
+        }
     }
 
     object "runtime" {
         code {
             /* ----- dispatcher: calldata to function call ----- */
             switch selector()
-                case 0xb60d4288 { /* fund() */ 
-                    fund()
-                }
-                case 0xc2052403 { /* payOut() */
-                    payOut()
-                }
-                case 0x590e1ae3 { /* refund() */
-                    refund()
-                }
-                case 0xca3c23c1 { /* viewProject() */
-                    let _creator, _amountToRaise, _state, _deadline := viewProject()
-                    let fmp := mload(0x40)
-                    mstore(fmp, _creator)
-                    mstore(add(fmp, 0x20), _amountToRaise)
-                    mstore(add(fmp, 0x40), _state)
-                    mstore(add(fmp, 0x60), _deadline)
-
-                    return(fmp, 0x20)
-                }
-                default {
-                    revert(0, 0)
-                }
+                case 0xb60d4288 { /* fund() */ fund() }
+                case 0xc2052403 { /* payOut() */ payOut() }
+                case 0x590e1ae3 { /* refund() */ refund() }
+                case 0xca3c23c1 { /* viewProject() */ viewProject() }
+                default { revert(0, 0) }
 
 
             /* ----- logic functions ----- */
             function fund() {
+
                 /* --- security checks --- */
                 if lt(callvalue(), 1) {
                     mstore(0x00, 24)
@@ -144,10 +167,6 @@ object "CrowdfundingSA" {
                 // add the new fund to the previous funds
                 sstore(helper, add(sload(helper), callvalue()))
 
-                /* --- emit event --- */
-
-                // ?
-
                 /* --- post fund state checking --- */
 
                 helper := balance(address()) // reuse old variables to save gas
@@ -158,9 +177,13 @@ object "CrowdfundingSA" {
                     // if the goal has been met, set the state to RAISED = 1
                     sstore(1, add(amountAndState, 1))
                 }
+
+                return(0, 0)
+                
             }
 
             function payOut() {
+
                 /* --- security checks --- */
                 let owner := sload(0)
                 if xor(caller(), owner) {
@@ -186,20 +209,20 @@ object "CrowdfundingSA" {
                 switch eq(success, 1)
                 case 1 {
                     // if the funds have been paid out, set the state to PAID = 4 (as it is in state 1, adding 3 will suffice)
-                    sstore(1, and(amountAndState, 3))
-
-                    /* --- emit event --- */
-
-                    // ?
+                    sstore(1, add(amountAndState, 3))
                 }
                 default {
                     mstore(0x00, 29)
                     mstore(0x20, "Can't transfer funds to owner")
                     revert(0x00, 0x40)
                 }
+
+                return(0, 0)
+
             }
 
             function refund() {
+
                 /* --- security checks --- */
                 let funder := caller()
                 
@@ -249,20 +272,38 @@ object "CrowdfundingSA" {
                     // if all the funds have been refunded, set the state to REFUNDED = 3
                     sstore(1, add(amountAndState, 1))
                 }
+
+                return(0, 0)
+
             }
 
-            function viewProject() -> _creator, _amountToRaise, _state, _deadline {
-                _creator := sload(0)
+            function viewProject() { 
+            
                 let amountAndState := sload(1)
-                _amountToRaise := shr(128, and(amountAndState, not(0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)))
-                _state := and(amountAndState, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
-                _deadline := sload(2)
+
+                let fmp := mload(64)
+                mstore(fmp, and(sload(0), sub(shl(160, 1), 1)))
+                mstore(add(fmp, 32), shr(128, amountAndState))
+                mstore(add(fmp, 64), and(amountAndState, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF))
+                mstore(add(fmp, 96), sload(2))
+                return(fmp, 128)
+            
+            }
+
+            function fundings() {
+                let fmp := mload(0x40)
+                
+                mstore(0x0, and(calldataload(4), sub(shl(160, 1), 1))) // store the address and the fundings map slot in memory to keccak
+                mstore(0x40, 4) // slot 4 is the fundings map
+
+                mstore(fmp, sload(keccak256(0, 0x40))) // keccak(address, fundingsSlot) is the slot where the value is stored
+                return(fmp, 0x20)
             }
             
             /* ----- calldata decoding helper function ----- */
             function selector() -> s {
                 // same as shift right 32-4=28 bytes (256 - 32 = 224) -> gets only the first 4 bytes (8 hex chars) for the function signature
-                s := shr(28, calldataload(0))
+                s := shr(224, calldataload(0))
             }
         }
     }

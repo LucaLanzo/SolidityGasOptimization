@@ -13,16 +13,11 @@ contract Crowdfunding {
 
     mapping (address => uint) public fundings;
 
-    event NewProjectStarted(string title, string descr, address projectAddress, address creator, uint amountToRaise, uint deadline);
-    event NewFunding(address sender, uint amount, uint currentBalance);
-    event ProjectPaidOut(address creator, uint256 raisedAmount);
-
-
     function viewProject() external view returns(
         address _creator,
         ProjectState _state,
-        uint _amountToRaise,
-        uint _deadline
+        uint256 _amountToRaise,
+        uint256 _deadline
     ) {
         _creator = creator;
         _state = state;
@@ -31,7 +26,7 @@ contract Crowdfunding {
     }
 
 
-    constructor(string memory _title, string memory _descr, uint _amountToRaise, uint _numberOfDaysUntilDeadline) {
+    constructor(uint256 _amountToRaise, uint256 _numberOfDaysUntilDeadline) {
         require(_amountToRaise > 0, "Amount to raise smaller than 0");
 
         creator = payable(msg.sender);
@@ -40,14 +35,7 @@ contract Crowdfunding {
         deadline = block.timestamp + (_numberOfDaysUntilDeadline * 1 days);
         startedAt = block.timestamp;
 
-        emit NewProjectStarted(
-            _title, 
-            _descr,
-            address(this),
-            msg.sender, 
-            _amountToRaise, 
-            deadline
-        );
+        // emit NewProjectStarted(_title, _descr, address(this), msg.sender, _amountToRaise, deadline);
     }
 
 
@@ -65,7 +53,7 @@ contract Crowdfunding {
         // fund
         fundings[msg.sender] += msg.value;
 
-        emit NewFunding(msg.sender, msg.value, address(this).balance);
+        // emit NewFunding(msg.sender, msg.value, address(this).balance);
 
         if(address(this).balance >= amountToRaise) {
             state = ProjectState.RAISED;
@@ -80,13 +68,11 @@ contract Crowdfunding {
        	require(msg.sender == creator, "Only project creator can pay out");
         require(state == ProjectState.RAISED, "Not raised or project expired");     
 
-        // temporary save for emit
-        uint _balance = address(this).balance;
-        bool transactionSuccessful = creator.send(_balance);
+        // no reentrancy protection needed as the whole funds are sent anyway
+        (bool sent, ) = creator.call{value: address(this).balance}("");
 
-        if (transactionSuccessful) {
+        if (sent) {
             state = ProjectState.PAID;
-            emit ProjectPaidOut(creator, _balance);
         }
     }
 

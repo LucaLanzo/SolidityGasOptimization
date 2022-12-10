@@ -3,7 +3,7 @@ pragma solidity ^0.8.17;
 
 
 contract CrowdfundingASM {
-    // enums are not supported with Yul, that's why an int256 is used
+    // enums are not supported with Yul, that's why an int128 is used
     // RAISING = 0, RAISED = 1, EXPIRED = 2, REFUNDED = 3, PAID = 4
     // enum ProjectState { RAISING, RAISED, EXPIRED, REFUNDED, PAID }
     
@@ -16,11 +16,6 @@ contract CrowdfundingASM {
 
     mapping (address => uint256) public fundings;
 
-    // event NewProjectStarted(string title, string descr, address projectAddress, address creator, uint128 amountToRaise, uint256 deadline);
-    // event NewFunding(address sender, uint256 amount, uint256 currentBalance);
-    // event ProjectPaidOut(address creator, uint256 raisedAmount);
-
-
     function viewProject() external view returns(
         address _creator,
         uint128 _amountToRaise,
@@ -32,14 +27,14 @@ contract CrowdfundingASM {
             // The state and amount to raise are two 16 byte values packed in the same 32 byte storage slot
             // An AND-mask is needed to clear 128 higher and lower order bits (16 bytes) of the 32 byte value
             let amountAndState := sload(1)
-            _amountToRaise := shr(128, and(amountAndState, not(0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)))
+            _amountToRaise := shr(128, amountAndState)
             _state := and(amountAndState, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
             _deadline := sload(2)
         }
     }
 
 
-    constructor(string memory _title, string memory _descr, uint128 _amountToRaise, uint256 _numberOfDaysUntilDeadline) {
+    constructor(uint128 _amountToRaise, uint256 _numberOfDaysUntilDeadline) {
         assembly {
             /* --- security checks --- */
 
@@ -57,13 +52,6 @@ contract CrowdfundingASM {
             sstore(1, shl(128, _amountToRaise))
             sstore(2, add(timestamp(), mul(_numberOfDaysUntilDeadline, 86400))) // a timestamp is always in seconds
             sstore(3, timestamp())
-
-            /* --- emit event --- */
-
-            // Keccak256: NewProjectStarted(string,string,address,address,uint128,uint256)
-            // the hash is computed outside of the contract to save gas 
-            let signatureHash := 0x99d6a8696589d8d6e9a6ca721dffbe3aa9b2e8664eadfe8b8105f69d467d264e
-            log1(_title, 0x40, signatureHash)
         }
     }
 
@@ -122,10 +110,6 @@ contract CrowdfundingASM {
             // to the old value at that location
             sstore(helper, add(sload(helper), callvalue()))
 
-            /* --- emit event --- */
-
-            // ?
-
             /* --- post fund state checking --- */
 
             helper := balance(address()) // reuse old variables to save gas
@@ -171,11 +155,7 @@ contract CrowdfundingASM {
             switch eq(success, 1)
             case 1 {
                 // if the funds have been paid out, set the state to PAID = 4 (as it is in state 1, adding 3 will suffice)
-                sstore(1, and(amountAndState, 3))
-
-                /* --- emit event --- */
-
-                // ?
+                sstore(1, add(amountAndState, 3))
             }
             default {
                 mstore(0x00, 29)

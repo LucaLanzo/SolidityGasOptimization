@@ -44,7 +44,7 @@ async function loadContract(abi, account, customAddress=undefined, deployYul=fal
 
         // if it shouldn't be deployed, get the contract address from argv or through the custom address
         if (customAddress === undefined) {
-            address = argumentsList.toString();
+            address = argumentsList[0].toString();
         } else {
             address = customAddress;
         }

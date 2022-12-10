@@ -6,13 +6,11 @@ const { loadContract, calculateGasSavings, writeToCSV } = require('./scriptHelpe
 async function main() { 
        
     const accounts = await hre.ethers.getSigners()
-    const from = 1;
     const to = accounts[0];
 
-
     // load the contract
-    const transferFunds = await loadContract("TransferFunds", from);
-    if (transferFunds == undefined) return;    
+    // loadContract(abi, account, customAddress=undefined, deployYul=false, constructorArgs=false)
+    const transferFunds = await loadContract("TransferFunds", 1, undefined, false, false);
 
 
     // test the Solidity transfer

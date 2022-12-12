@@ -12,20 +12,20 @@ object "ArithmeticsSA" {
         code {
             /* ----- dispatcher: calldata to function call ----- */
             switch selector()
-                case 0x616d5b9d /* add(uint256,uint256) */ {
-                    addY(calldataload(0x04), calldataload(0x24))
+                case 0x993d0375 /* add(uint256,uint256) */ {
+                    addYul(calldataload(0x04), calldataload(0x24))
                 }
-                case 0xb46bc106 {
-                    subY(calldataload(0x04), calldataload(0x24))
+                case 0x4017c1e4 {
+                    subYul(calldataload(0x04), calldataload(0x24))
                 }
-                case 0x75990598 {
-                    mulY(calldataload(0x04), calldataload(0x24))
+                case 0xef84dd44 {
+                    mulYul(calldataload(0x04), calldataload(0x24))
                 }
-                case 0x8cfd3f23 {
-                    divY(calldataload(0x04), calldataload(0x24))
+                case 0xe4e7f88b {
+                    divYul(calldataload(0x04), calldataload(0x24))
                 }
-                case 0x43af3536 {
-                    expY(calldataload(0x04), calldataload(0x24))
+                case 0x41f9c19b {
+                    expYul(calldataload(0x04), calldataload(0x24))
                 }
                 default {
                     revert(0, 0)
@@ -33,27 +33,27 @@ object "ArithmeticsSA" {
 
 
             /* ----- arithmetic functions ----- */
-            function addY(x, y) {
+            function addYul(x, y) {
                 mstore(0x80, add(x, y))
                 return(0x80, 0x20)
             }
 
-            function subY(x, y) {
+            function subYul(x, y) {
                 mstore(0x80, sub(x, y))
                 return(0x80, 0x20)
             }
 
-            function mulY(x, y) {
+            function mulYul(x, y) {
                 mstore(0x80, mul(x, y))
                 return(0x80, 0x20)            
             }
 
-            function divY(x, y) {
+            function divYul(x, y) {
                 mstore(0x80, div(x, y))
                 return(0x80, 0x20)
             }
 
-            function expY(x, y) {
+            function expYul(x, y) {
                 mstore(0x80, exp(x, y))
                 return(0x80, 0x20)
             }

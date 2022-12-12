@@ -7,7 +7,7 @@ const { loadContract, calculateGasSavings, writeToCSV } = require('./scriptHelpe
 async function main() {
     // load the contracts
     const arithmetics = await loadContract("Arithmetics", 0, undefined, false, false);
-    const arithmeticsASM = await loadContract("Arithmetics", 0, undefined, false, false);
+    const arithmeticsASM = await loadContract("ArithmeticsASM", 0, undefined, false, false);
     const arithmeticsSA = await loadContract("ArithmeticsSA", 0, undefined, true, false)
 
 
@@ -25,7 +25,7 @@ async function main() {
 
     // test the ASM add method
     console.log("\nAdd ASM ...")
-    let transactionASM = await arithmeticsASM.addYul(6, 3)
+    let transactionASM = await arithmeticsASM.addASM(6, 3)
     // log gas costs
     let receiptASM = await transactionASM.wait()
     let gasUsedASM = receiptASM.cumulativeGasUsed;
@@ -61,7 +61,7 @@ async function main() {
 
     // test the ASM sub method
     console.log("\nSub ASM ...")
-    transactionASM = await arithmeticsASM.subYul(6, 3)
+    transactionASM = await arithmeticsASM.subASM(6, 3)
     // log gas costs
     receiptASM = await transactionASM.wait()
     gasUsedASM = receiptASM.cumulativeGasUsed;
@@ -97,7 +97,7 @@ async function main() {
 
     // test the ASM sub method
     console.log("\nMul ASM ...")
-    transactionASM = await arithmeticsASM.subYul(6, 3)
+    transactionASM = await arithmeticsASM.subASM(6, 3)
     // log gas costs
     receiptASM = await transactionASM.wait()
     gasUsedASM = receiptASM.cumulativeGasUsed;
@@ -133,7 +133,7 @@ async function main() {
 
     // test the ASM div method
     console.log("\nDiv ASM ...")
-    transactionASM = await arithmeticsASM.divYul(6, 3)
+    transactionASM = await arithmeticsASM.divASM(6, 3)
     // log gas costs
     receiptASM = await transactionASM.wait()
     gasUsedASM = receiptASM.cumulativeGasUsed;
@@ -169,7 +169,7 @@ async function main() {
 
     // test the ASM exp method
     console.log("\nExp ASM ...")
-    transactionASM = await arithmeticsASM.expYul(6, 3)
+    transactionASM = await arithmeticsASM.expASM(6, 3)
     // log gas costs
     receiptASM = await transactionASM.wait()
     gasUsedASM = receiptASM.cumulativeGasUsed;

@@ -1,0 +1,16 @@
+function,gasUsage
+addSol,22338
+addASM,21974
+addSA,21479
+subSol,22426
+subASM,21975
+subSA,21501
+mulSol,22478
+mulASM,21975
+mulSA,21501
+divSol,22397
+divASM,21998
+divSA,21547
+expSol,22615
+expASM,22054
+expSA,21624

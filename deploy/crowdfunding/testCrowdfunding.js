@@ -1,7 +1,7 @@
 // require the Hardhat Runtime Environment explicitly
 // optional, but useful for running script in standalone fashion through `node <script>`
 const hre = require("hardhat");
-const { loadContract, calculateGasSavings, writeToCSV } = require('./scriptHelpers.js');
+const { loadContract, calculateGasSavings, writeToCSV } = require('../scriptHelpers.js');
 
 
 async function main() {
@@ -39,18 +39,18 @@ async function main() {
 
     // test the Sol view method
     console.log("\nCalling Sol view function ...")
-    let transaction = await crowdfunding.viewProject()
-    console.log(transaction.toString())
+    let transactionSol = await crowdfunding.viewProject()
+    console.log(transactionSol.toString())
 
     // test the ASM view method
     console.log("\nCalling ASM view function ...")
-    transaction = await crowdfundingASM.viewProject()
-    console.log(transaction.toString())
+    let transactionASM = await crowdfundingASM.viewProject()
+    console.log(transactionASM.toString())
 
     // test the SA view method
     console.log("\nCalling SA view function ...")
-    transaction = await crowdfundingSA.viewProject()
-    console.log(transaction.toString())
+    let transactionSA = await crowdfundingSA.viewProject()
+    console.log(transactionSA.toString())
 
 
 
@@ -60,37 +60,42 @@ async function main() {
 
     // test the Sol funding
     console.log("\nTesting the Sol funding function ...")
-    transaction = await crowdfundingSec.fund(
+    transactionSol = await crowdfundingSec.fund(
         { value: hre.ethers.utils.parseEther("0.05")}
     )
     // log gas costs
-    let receipt = await transaction.wait()
-    let gasUsed = receipt.cumulativeGasUsed;
+    let receiptSol = await transactionSol.wait()
+    let gasUsedSol = receiptSol.cumulativeGasUsed;
     
-    console.log(`.. done. Gas used: ${gasUsed}`)
+    console.log(`.. done. Gas used: ${gasUsedSol}`)
 
     // test the ASM funding
     console.log("\nTesting the ASM funding function ...")
-    transaction = await crowdfundingASMSec.fund(
+    transactionASM = await crowdfundingASMSec.fund(
         { value: hre.ethers.utils.parseEther("0.05")}
     )
     // log gas costs
-    receipt = await transaction.wait()
-    gasUsed = receipt.cumulativeGasUsed;
+    let receiptASM = await transactionASM.wait()
+    let gasUsedASM = receiptASM.cumulativeGasUsed;
     
-    console.log(`.. done. Gas used: ${gasUsed}`)
+    console.log(`.. done. Gas used: ${gasUsedASM}`)
 
     // test the SA funding
     console.log("\nTesting the SA funding function ...")
-    transaction = await crowdfundingSASec.fund(
+    transactionSA = await crowdfundingSASec.fund(
         { value: hre.ethers.utils.parseEther("0.05")}
     )
     // log gas costs
-    receipt = await transaction.wait()
-    gasUsed = receipt.cumulativeGasUsed;
+    let receiptSA = await transactionSA.wait()
+    let gasUsedSA = receiptSA.cumulativeGasUsed;
     
-    console.log(`.. done. Gas used: ${gasUsed}`)
+    console.log(`.. done. Gas used: ${gasUsedSA}`)
     
+    // calculate gas savings and save to .csv
+    console.log(`\nASM saved ${calculateGasSavings(gasUsedSol, gasUsedASM)}% gas.`)
+    console.log(`\nSA saved ${calculateGasSavings(gasUsedSol, gasUsedSA)}% gas.`)
+    writeToCSV([["crowdfundingFundSol", String(gasUsedSol)], ["crowdfundingFundASM", String(gasUsedASM)], ["crowdfundingFundSA", String(gasUsedSA)]])
+
 
 
     // #################
@@ -99,36 +104,35 @@ async function main() {
     
     // test the Sol payOut
     console.log("\nTesting the Sol payOut function ...")
-    transaction = await crowdfunding.payOut()
+    transactionSol = await crowdfunding.payOut()
     // log gas costs
-    receipt = await transaction.wait()
-    gasUsed = receipt.cumulativeGasUsed;
+    receiptSol = await transactionSol.wait()
+    gasUsedSol = receiptSol.cumulativeGasUsed;
     
-    console.log(`.. done. Gas used: ${gasUsed}`)
+    console.log(`.. done. Gas used: ${gasUsedSol}`)
 
     // test the ASM payOut
     console.log("\nTesting the ASM payOut function ...")
-    transaction = await crowdfundingASM.payOut()
+    transactionASM = await crowdfundingASM.payOut()
     // log gas costs
-    receipt = await transaction.wait()
-    gasUsed = receipt.cumulativeGasUsed;
+    receiptASM = await transactionASM.wait()
+    gasUsedASM = receiptASM.cumulativeGasUsed;
     
-    console.log(`.. done. Gas used: ${gasUsed}`)
+    console.log(`.. done. Gas used: ${gasUsedASM}`)
 
     // test the SA payOut
     console.log("\nTesting the SA payOut function ...")
-    transaction = await crowdfundingSA.payOut()
+    transactionSA = await crowdfundingSA.payOut()
     // log gas costs
-    receipt = await transaction.wait()
-    gasUsed = receipt.cumulativeGasUsed;
+    receiptSA = await transactionSA.wait()
+    gasUsedSA = receiptSA.cumulativeGasUsed;
     
-    console.log(`.. done. Gas used: ${gasUsed}`)
+    console.log(`.. done. Gas used: ${gasUsedSA}`)
     
-
-    // console.log(`\nYul saved ${calculateGasSavings(gasUsedSol, gasUsedYul)}% gas.`)
-
-    // save the results into the csv file
-    // writeToCSV([["onlyOwnerSol", String(gasUsedSol)], ["onlyOwnerYul", String(gasUsedYul)]])
+    // calculate gas savings and save to .csv
+    console.log(`\nASM saved ${calculateGasSavings(gasUsedSol, gasUsedASM)}% gas.`)
+    console.log(`\nSA saved ${calculateGasSavings(gasUsedSol, gasUsedSA)}% gas.`)
+    writeToCSV([["crowdfundingPayoutSol", String(gasUsedSol)], ["crowdfundingPayoutASM", String(gasUsedASM)], ["crowdfundingPayoutSA", String(gasUsedSA)]])
 }
 
 

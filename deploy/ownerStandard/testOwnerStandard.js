@@ -1,7 +1,7 @@
 // require the Hardhat Runtime Environment explicitly
 // optional, but useful for running script in standalone fashion through `node <script>`
 const hre = require("hardhat");
-const { loadContract, calculateGasSavings, writeToCSV } = require('./scriptHelpers.js');
+const { loadContract, calculateGasSavings, writeToCSV } = require('../scriptHelpers.js');
 
 
 async function main() {

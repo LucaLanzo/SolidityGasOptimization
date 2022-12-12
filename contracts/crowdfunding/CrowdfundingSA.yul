@@ -141,7 +141,7 @@ object "CrowdfundingSA" {
 
                 // check for expiration()
                 let amountAndState := sload(1)
-                if and(gt(timestamp(), sload(2)), lt(balance(address()), shr(128, and(amountAndState, not(0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF))))) {
+                if and(gt(timestamp(), sload(2)), lt(selfbalance(), shr(128, and(amountAndState, not(0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF))))) {
                     // if the deadline and the funding goal hasn't been met, set the state to EXPIRED = 2
                     // but only if it hasn't been set before!
                     if iszero(eq(and(amountAndState, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF), 2)) {
@@ -169,7 +169,7 @@ object "CrowdfundingSA" {
 
                 /* --- post fund state checking --- */
 
-                helper := balance(address()) // reuse old variables to save gas
+                helper := selfbalance() // reuse old variables to save gas
                 amountAndState := sload(1)
 
                 // if (balance >= amount) -> no greaterthanequals in Sol -> if (balance > amount-1)
@@ -202,20 +202,19 @@ object "CrowdfundingSA" {
 
                 /* --- send funds --- */
 
-                // no reentrancy protection needed as the whole funds are sent anyway
-                let success := call(gas(), owner, balance(address()), 0, 0, 0, 0)
+                /* --- send funds --- */
 
-                /* --- check success --- */
-                switch eq(success, 1)
-                case 1 {
-                    // if the funds have been paid out, set the state to PAID = 4 (as it is in state 1, adding 3 will suffice)
-                    sstore(1, add(amountAndState, 3))
-                }
-                default {
+                // no reentrancy protection needed as the whole funds are sent anyway
+                if iszero(call(0, owner, selfbalance(), 0, 0, 0, 0)) {
+                    // revert if the transaction failed
                     mstore(0x00, 29)
                     mstore(0x20, "Can't transfer funds to owner")
                     revert(0x00, 0x40)
                 }
+
+                /* --- successful transfer --- */
+                // if the funds have been paid out, set the state to PAID = 4 (as it is in state 1, adding 3 will suffice)
+                sstore(1, add(amountAndState, 3))
 
                 return(0, 0)
 
@@ -240,7 +239,7 @@ object "CrowdfundingSA" {
 
                 // check for expiration
                 let amountAndState := sload(1)
-                if and(gt(timestamp(), sload(2)), lt(balance(address()), shr(128, and(amountAndState, not(0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF))))) {
+                if and(gt(timestamp(), sload(2)), lt(selfbalance(), shr(128, and(amountAndState, not(0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF))))) {
                     // if the deadline and the funding goal hasn't been met, set the state to EXPIRED = 2
                     // but only if it hasn't been set before!
                     if iszero(eq(and(amountAndState, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF), 2)) {
@@ -258,17 +257,15 @@ object "CrowdfundingSA" {
                     revert(0x00, 0x40)
                 }
 
-                /* --- send funds and reentrancy prevention --- */
+                /* --- send funds, reentrancy prevention and check success --- */
                 sstore(helper, 0) // set the funds to zero
-                let success := call(gas(), funder, amount, 0, 0, 0, 0)
-                
-                /* --- check success --- */
-                if iszero(eq(success, 1)) {
+
+                if iszero(call(0, funder, amount, 0, 0, 0, 0)) {
                     // revert if the transaction failed
                     sstore(helper, amount)
                 }
 
-                if eq(balance(address()), 0) {
+                if eq(selfbalance(), 0) {
                     // if all the funds have been refunded, set the state to REFUNDED = 3
                     sstore(1, add(amountAndState, 1))
                 }

@@ -34,8 +34,6 @@ contract Crowdfunding {
         amountToRaise = _amountToRaise;
         deadline = block.timestamp + (_numberOfDaysUntilDeadline * 1 days);
         startedAt = block.timestamp;
-
-        // emit NewProjectStarted(_title, _descr, address(this), msg.sender, _amountToRaise, deadline);
     }
 
 
@@ -52,8 +50,6 @@ contract Crowdfunding {
 
         // fund
         fundings[msg.sender] += msg.value;
-
-        // emit NewFunding(msg.sender, msg.value, address(this).balance);
 
         if(address(this).balance >= amountToRaise) {
             state = ProjectState.RAISED;

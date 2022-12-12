@@ -37,8 +37,8 @@ async function main() {
     // #### VIEW #####
     // ###############
 
-    // test the view method
-    console.log("\nCalling view function ...")
+    // test the Sol view method
+    console.log("\nCalling Sol view function ...")
     let transaction = await crowdfunding.viewProject()
     console.log(transaction.toString())
 
@@ -58,8 +58,8 @@ async function main() {
     // #### FUNDING #####
     // ##################
 
-    // test the funding
-    console.log("\nTesting the funding function ...")
+    // test the Sol funding
+    console.log("\nTesting the Sol funding function ...")
     transaction = await crowdfundingSec.fund(
         { value: hre.ethers.utils.parseEther("0.05")}
     )
@@ -97,8 +97,8 @@ async function main() {
     // #### PAYOUT #####
     // #################
     
-    // test the payOut
-    console.log("\nTesting the payOut function ...")
+    // test the Sol payOut
+    console.log("\nTesting the Sol payOut function ...")
     transaction = await crowdfunding.payOut()
     // log gas costs
     receipt = await transaction.wait()

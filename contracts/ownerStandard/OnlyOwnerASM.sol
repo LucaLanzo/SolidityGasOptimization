@@ -2,7 +2,7 @@
 pragma solidity ^0.8.17;
 
 
-contract OnlyOwnerYul {
+contract OnlyOwnerASM {
 
     constructor() {
         assembly {
@@ -13,7 +13,7 @@ contract OnlyOwnerYul {
 
     modifier onlyOwner() {
         assembly {
-            if iszero(eq(caller(), sload(0))) {
+            if xor(caller(), sload(0)) {
                 // the caller is not the stored owner, revert if eq() != 1
                 revert(0, 0)
             }

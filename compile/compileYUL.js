@@ -1,7 +1,7 @@
 // Custom YUL compiler
 
 var argumentsList = process.argv.slice(2)
-if (argumentsList.length == 0) { console.log("Please specify: '<directory>' '<filenameWithoutExtension'."); return }
+if (argumentsList.length == 0) { console.log("Please specify in args: '<directory>' '<filenameWithoutExtension'."); return }
 const filePath = argumentsList[0]
 const fileName = argumentsList[1]
 const fileNameWExt = argumentsList[1] + ".yul"
@@ -14,6 +14,8 @@ const outputPath = path.resolve(__dirname, "..", "build", `${fileName}.bytecode.
 
 const inputPath = path.resolve(__dirname, "..", "contracts", filePath, fileNameWExt);
 const source = fs.readFileSync(inputPath, "utf-8");
+
+console.log(source)
 
 var input = {
     language: 'Yul',

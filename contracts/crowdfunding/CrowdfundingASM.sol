@@ -39,11 +39,12 @@ contract CrowdfundingASM {
             /* --- security checks --- */
 
             if iszero(_amountToRaise) {
-                mstore(0x80, shl(229, 4594637))
+                mstore(0x80, 0x08c379a0)
                 mstore(0x84, 32)
-                mstore(0x104, 30)
-                mstore(0x124, "Amount to raise smaller than 0")
-                revert(0x80, 0x64)
+                mstore(0xA4, 30)
+                mstore(0xC4, "Amount to raise smaller than 0")
+            
+                revert(0x80, 100)
             }
 
             /* --- store variables --- */
@@ -66,22 +67,22 @@ contract CrowdfundingASM {
         assembly {
             /* --- security checks --- */
             if iszero(callvalue()) {
-                let fmp := mload(0x40)
-                mstore(fmp, shl(229, 4594637))
-                mstore(add(fmp, 0x04), 32)
-                mstore(add(fmp, 0x24), 24)
-                mstore(add(fmp, 0x44), "Specify a funding amount")
-                revert(fmp, 0x64)
+                mstore(0x80, 0x08c379a0)
+                mstore(0x84, 32)
+                mstore(0xA4, 24)
+                mstore(0xC4, "Specify a funding amount")
+            
+                revert(0x80, 100)
             }
             
             let funder := caller()
             if eq(funder, sload(0)) {
-                let fmp := mload(0x40)
-                mstore(fmp, shl(229, 4594637))
-                mstore(add(fmp, 0x04), 32)
-                mstore(add(fmp, 0x24), 27)
-                mstore(add(fmp, 0x44), "Project creators can't fund")
-                revert(fmp, 0x64)
+                mstore(0x80, 0x08c379a0)
+                mstore(0x84, 32)
+                mstore(0xA4, 27)
+                mstore(0xC4, "Project creators can't fund")
+            
+                revert(0x80, 100)
             }
 
             // impossible to call local Solidity functions from assembly: checkForExpiration() implemented here
@@ -100,7 +101,7 @@ contract CrowdfundingASM {
             // to get the right 16 byte state, an AND-Mask is applied to the combined 32 byte amountAndState field
             if xor(and(amountAndState, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF), 0) {
                 let fmp := mload(0x40)
-                mstore(fmp, shl(229, 4594637))
+                mstore(fmp, 0x08c379a0)
                 mstore(add(fmp, 0x04), 32)
                 mstore(add(fmp, 0x24), 32)
                 mstore(add(fmp, 0x44), "The project is no longer raising")
@@ -144,23 +145,23 @@ contract CrowdfundingASM {
             /* --- security checks --- */
             let owner := sload(0)
             if xor(caller(), owner) {
-                let fmp := mload(0x40)
-                mstore(fmp, shl(229, 4594637))
-                mstore(add(fmp, 0x04), 32)
-                mstore(add(fmp, 0x24), 32)
-                mstore(add(fmp, 0x44), "Only project creator can pay out")
-                revert(fmp, 0x64)
+                mstore(0x80, 0x08c379a0)
+                mstore(0x84, 32)
+                mstore(0xA4, 32)
+                mstore(0xC4, "Only project creator can pay out")
+            
+                revert(0x80, 100)
             }
 
             let amountAndState := sload(1)
             if xor(and(amountAndState, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF), 1) {
-                // only pay out if it is in state RAISED = 1                
-                let fmp := mload(0x40)
-                mstore(fmp, shl(229, 4594637))
-                mstore(add(fmp, 0x04), 32)
-                mstore(add(fmp, 0x24), 29)
-                mstore(add(fmp, 0x44), "Not raised or project expired")
-                revert(fmp, 0x64)
+                // only pay out if it is in state RAISED = 1
+                mstore(0x80, 0x08c379a0)
+                mstore(0x84, 32)
+                mstore(0xA4, 29)
+                mstore(0xC4, "Not raised or project expired")
+            
+                revert(0x80, 100)
             }
 
             /* --- send funds --- */
@@ -168,12 +169,12 @@ contract CrowdfundingASM {
             // no reentrancy protection needed as the whole funds are sent anyway
             if iszero(call(0, owner, selfbalance(), 0, 0, 0, 0)) {
                 // revert if the transaction failed
-                let fmp := mload(0x40)
-                mstore(fmp, shl(229, 4594637))
-                mstore(add(fmp, 0x04), 32)
-                mstore(add(fmp, 0x24), 29)
-                mstore(add(fmp, 0x44), "Can't transfer funds to owner")
-                revert(fmp, 0x64)
+                mstore(0x80, 0x08c379a0)
+                mstore(0x84, 32)
+                mstore(0xA4, 29)
+                mstore(0xC4, "Can't transfer funds to owner")
+            
+                revert(0x80, 100)
             }
 
             /* --- successful transfer --- */
@@ -197,12 +198,12 @@ contract CrowdfundingASM {
             let amount := sload(helper)
 
             if iszero(amount) {
-                let fmp := mload(0x40)
-                mstore(fmp, shl(229, 4594637))
-                mstore(add(fmp, 0x04), 32)
-                mstore(add(fmp, 0x24), 32)
-                mstore(add(fmp, 0x44), "Can't pay out you haven't funded")
-                revert(fmp, 0x64)
+                mstore(0x80, 0x08c379a0)
+                mstore(0x84, 32)
+                mstore(0xA4, 32)
+                mstore(0xC4, "Can't pay out you haven't funded")
+            
+                revert(0x80, 100)
             }
 
             // check for expiration
@@ -220,12 +221,12 @@ contract CrowdfundingASM {
 
             // If state is not EXPIRED = 2
             if xor(and(amountAndState, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF), 2) {
-                let fmp := mload(0x40)
-                mstore(fmp, shl(229, 4594637))
-                mstore(add(fmp, 0x04), 32)
-                mstore(add(fmp, 0x24), 30)
-                mstore(add(fmp, 0x44), "The project hasn't expired yet")
-                revert(fmp, 0x64)
+                mstore(0x80, 0x08c379a0)
+                mstore(0x84, 32)
+                mstore(0xA4, 30)
+                mstore(0xC4, "The project hasn't expired yet")
+            
+                revert(0x80, 100)
             }
 
             /* --- send funds, reentrancy prevention and check success --- */

@@ -6,7 +6,7 @@ contract OnlyOwnerASM {
 
     constructor() {
         assembly {
-            // save the address of the caller of the contract creation, which is the onwer
+            // save the address of the caller of the contract creation, which is the owner
             sstore(0, caller())
         }
     }
@@ -14,7 +14,7 @@ contract OnlyOwnerASM {
     modifier onlyOwner() {
         assembly {
             if xor(caller(), sload(0)) {
-                // the caller is not the stored owner, revert if eq() != 1
+                // the caller is not the stored owner, revert if xor() == 1
                 revert(0, 0)
             }
         }

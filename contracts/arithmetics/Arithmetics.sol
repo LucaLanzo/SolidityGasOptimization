@@ -10,10 +10,9 @@ contract Arithmetics {
         result = x + y;
     }
 
-    function addYul(uint8 x, uint8 y) public returns(uint8) {
-        assembly {
-            mstore(0x80, add(x, y))
-            return(0x80, 0x20)
+    function addSolUnchecked(uint8 x, uint8 y) public returns(uint8 result) {
+        unchecked {
+            result = x + y;
         }
     }
 
@@ -23,10 +22,9 @@ contract Arithmetics {
         result = x - y;
     }
 
-    function subYul(uint8 x, uint8 y) public returns(uint8) {
-        assembly {
-            mstore(0x80, sub(x, y))
-            return(0x80, 0x20)
+    function subSolUnchecked(uint8 x, uint8 y) public returns(uint8 result) {
+        unchecked {
+            result = x - y;
         }
     }
 
@@ -36,10 +34,9 @@ contract Arithmetics {
         result = x * y;
     }
 
-    function mulYul(uint8 x, uint8 y) public returns(uint8) {
-        assembly {
-            mstore(0x80, mul(x, y))
-            return(0x80, 0x20)
+    function mulSolUnchecked(uint8 x, uint8 y) public returns(uint8 result) {
+        unchecked {
+            result = x * y;
         }
     }
 
@@ -49,10 +46,9 @@ contract Arithmetics {
         result = x / y;
     }
 
-    function divYul(uint8 x, uint8 y) public returns(uint8) {
-        assembly {
-            mstore(0x80, div(x, y))
-            return(0x80, 0x20)
+    function divSolUnchecked(uint8 x, uint8 y) public returns(uint8 result) {
+        unchecked {
+            result = x / y;
         }
     }
 
@@ -62,10 +58,9 @@ contract Arithmetics {
         result = x ** y;
     }
 
-    function expYul(uint8 x, uint8 y) public returns(uint8) {
-        assembly {
-            mstore(0x80, exp(x, y))
-            return(0x80, 0x20)
+    function expSolUnchecked(uint8 x, uint8 y) public returns(uint8 result) {
+        unchecked {
+            result = x ** y;
         }
     }
 }

@@ -12,7 +12,7 @@ object "ArithmeticsSA" {
         code {
             /* ----- dispatcher: calldata to function call ----- */
             switch selector()
-                case 0x993d0375 /* add(uint256,uint256) */ {
+                case 0x993d0375 /* ----- add(uint256,uint256) ----- */ {
                     addYul(calldataload(0x04), calldataload(0x24))
                 }
                 case 0x4017c1e4 {

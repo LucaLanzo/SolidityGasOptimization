@@ -6,8 +6,8 @@ contract Crowdfunding {
     enum ProjectState { RAISING, RAISED, EXPIRED, REFUNDED, PAID }
     
     address payable private creator; // to pay out    
+    uint128 private amountToRaise;
     ProjectState private state;
-    uint256 private amountToRaise;
     uint256 private deadline;
     uint256 private startedAt;
 
@@ -15,23 +15,23 @@ contract Crowdfunding {
 
     function viewProject() external view returns(
         address _creator,
-        ProjectState _state,
         uint256 _amountToRaise,
+        ProjectState _state,
         uint256 _deadline
     ) {
         _creator = creator;
-        _state = state;
         _amountToRaise = amountToRaise;
+        _state = state;
         _deadline = deadline;
     }
 
 
-    constructor(uint256 _amountToRaise, uint256 _numberOfDaysUntilDeadline) {
+    constructor(uint128 _amountToRaise, uint256 _numberOfDaysUntilDeadline) {
         require(_amountToRaise > 0, "Amount to raise smaller than 0");
 
         creator = payable(msg.sender);
-        state = ProjectState.RAISING;
         amountToRaise = _amountToRaise;
+        state = ProjectState.RAISING;
         deadline = block.timestamp + (_numberOfDaysUntilDeadline * 1 days);
         startedAt = block.timestamp;
     }
@@ -65,7 +65,8 @@ contract Crowdfunding {
         require(state == ProjectState.RAISED, "Not raised or project expired");     
 
         // no reentrancy protection needed as the whole funds are sent anyway
-        (bool sent, ) = creator.call{value: address(this).balance}("");
+        // zero gas, as the EVM will automatically add 2300 gas for an Ether transfer
+        (bool sent, ) = creator.call{ gas: 0, value: address(this).balance }("");
 
         if (sent) {
             state = ProjectState.PAID;
@@ -86,9 +87,9 @@ contract Crowdfunding {
         uint _amountToRefund = fundings[msg.sender];
         fundings[msg.sender] = 0;
 
-        bool transactionSuccessful = payable(msg.sender).send(_amountToRefund);
+        (bool sent, ) = payable(msg.sender).call{ gas: 0, value: _amountToRefund }("");
 
-        if (!transactionSuccessful) {
+        if (!sent) {
             // revert
             fundings[msg.sender] = _amountToRefund;
         }

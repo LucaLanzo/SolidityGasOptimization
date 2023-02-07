@@ -1,55 +1,7 @@
 object "CrowdfundingSA" {
-    code {
-        /* ----- constructor ----- */
-        /* --- security checks --- */
-        /*
-        ################
-        ### REMINDER ###
-        ################
-        
-        calldata is handled on external functions:
-
-            CALLDATA
-            offsetFromSig  offset      value
-            0x00 (0)       0x04 (4)    offset title = 128
-            0x20 (32)      0x24 (36)   offset descr = 192
-            0x40 (64)      0x44 (68)   uint128 amountToRaise
-            0x60 (96)      0x64 (100)  uint256 numberOfDaysUntilDeadline
-            0x80 (128)     0x84 (132)  length title
-            0xa0 (160)     0xa4 (164)  title string
-            0xc0 (192)     0xc4 (196)  length descr
-            0xe0 (224)     0xe4 (228)  descr string
-        
-        let lengthOfTitle := calldataload(add(4, calldataload(4)))  // cdl(0) + 4 sig
-        let lengthOfDescr := calldataload(add(4, calldataload(36))) // cdl(32) + 4 sig
-        let title := calldataload(add(add(4, calldataload(4))), 32)
-        let descr := calldataload(add(add(4, calldataload(36))), 32)
-        let _amountToRaise := calldataload(68)
-        let _numberOfDaysUntilDeadline := calldataload(100)
-
-        Whereas memory
-
-            MEMORY
-            offsetFromSig  value
-            0x00 (0)       scratch
-            0x20 (32)      scratch
-            0x40 (64)      free memory pointer => value = 0x140 (320)
-            0x60 (96)      zero slot for initial values of dynamic memory arrays
-            0x80 (128)     length title
-            0xa0 (160)     title string
-            0xc0 (192)     length descr
-            0xe0 (224)     descr string
-            0x100 (256)    uint128 amountToRaise
-            0x120 (288)    uint256 numberOfDaysUntilDeadline
-            0x140 (320)    free memory
-            
-        */
-        
-        {
-            // revert if any ethereum is sent over in the constructor
-            // if callvalue() { revert(0, 0) }
-            
-            // calculate the size of the constructor arguments and programs
+    code {  
+        {       
+            // calculate the size of the constructor arguments
             let programSize := datasize("CrowdfundingSA")
             let argSize := sub(codesize(), programSize)
 
@@ -78,13 +30,9 @@ object "CrowdfundingSA" {
             // load numberOfDaysUntilDeadline stored at 160 to 192
             let numberOfDaysUntilDeadline := mload(160)
 
-            // if amountToRaise = 0
-            // if iszero(eq(amountToRaise, and(amountToRaise, sub(shl(128, 1), 1)))) {
-            //     revert(0, 0)
-            // }
             
             // save the arguments to storage
-            constructorCrowdfundingSA(amountToRaise, numberOfDaysUntilDeadline)
+            saveToStorage(amountToRaise, numberOfDaysUntilDeadline)
             
             // deploy the contract and save it to memory, but not at 0 like normally
             // but rather at free memory pointer stored at 0x40 which is 0x80 + argumentSize
@@ -94,16 +42,17 @@ object "CrowdfundingSA" {
             return(fmp, datasizeRT)
         }
         
-        function constructorCrowdfundingSA(amountToRaise, numberOfDaysUntilDeadline)
-        {
+        function saveToStorage(amountToRaise, numberOfDaysUntilDeadline) {
             // same as in the inline assembly
-
-            if iszero(amountToRaise)
-            {
-                mstore(0, 30)
-                mstore(0x20, "Amount to raise smaller than 0")
-                revert(0, 0x40)
+            if iszero(amountToRaise) {
+                let fmp := mload(0x40)
+                mstore(fmp, shl(229, 4594637))
+                mstore(add(fmp, 0x04), 32)
+                mstore(add(fmp, 0x24), 30)
+                mstore(add(fmp, 0x44), "Amount to raise smaller than 0")
+                revert(fmp, 0x64)
             }
+
             sstore(0, caller())
             sstore(1, shl(128, amountToRaise))
             sstore(2, add(timestamp(), mul(numberOfDaysUntilDeadline, 86400)))
@@ -126,17 +75,23 @@ object "CrowdfundingSA" {
             function fund() {
 
                 /* --- security checks --- */
-                if lt(callvalue(), 1) {
-                    mstore(0x00, 24)
-                    mstore(0x20, "Specify a funding amount")
-                    revert(0x00, 0x40)
+                if iszero(callvalue()) {
+                    let fmp := mload(0x40)
+                    mstore(fmp, shl(229, 4594637))
+                    mstore(add(fmp, 0x04), 32)
+                    mstore(add(fmp, 0x24), 24)
+                    mstore(add(fmp, 0x44), "Specify a funding amount")
+                    revert(fmp, 0x64)
                 }
                 
                 let funder := caller()
-                if iszero(xor(funder, sload(0))) {
-                    mstore(0x00, 27)
-                    mstore(0x20, "Project creators can't fund")
-                    revert(0x00, 0x40)
+                if eq(funder, sload(0)) {
+                    let fmp := mload(0x40)
+                    mstore(fmp, shl(229, 4594637))
+                    mstore(add(fmp, 0x04), 32)
+                    mstore(add(fmp, 0x24), 27)
+                    mstore(add(fmp, 0x44), "Project creators can't fund")
+                    revert(fmp, 0x64)
                 }
 
                 // check for expiration()
@@ -150,11 +105,14 @@ object "CrowdfundingSA" {
                     }
                 }
 
-                // If state is not RAISING = 0
-                if iszero(eq(and(amountAndState, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF), 0)) {
-                    mstore(0x00, 32)
-                    mstore(0x20, "The project is no longer raising")
-                    revert(0x00, 0x40)
+                // if state is not RAISING = 0, revert
+                if xor(and(amountAndState, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF), 0) {
+                    let fmp := mload(0x40)
+                    mstore(fmp, shl(229, 4594637))
+                    mstore(add(fmp, 0x04), 32)
+                    mstore(add(fmp, 0x24), 32)
+                    mstore(add(fmp, 0x44), "The project is no longer raising")
+                    revert(fmp, 0x64)
                 }
 
                 /* --- funding logic --- */
@@ -187,29 +145,36 @@ object "CrowdfundingSA" {
                 /* --- security checks --- */
                 let owner := sload(0)
                 if xor(caller(), owner) {
-                    mstore(0x00, 32)
-                    mstore(0x20, "Only project creator can pay out")
-                    revert(0x00, 0x40)
+                    let fmp := mload(0x40)
+                    mstore(fmp, shl(229, 4594637))
+                    mstore(add(fmp, 0x04), 32)
+                    mstore(add(fmp, 0x24), 32)
+                    mstore(add(fmp, 0x44), "Only project creator can pay out")
+                    revert(fmp, 0x64)
                 }
 
                 let amountAndState := sload(1)
-                if iszero(eq(and(amountAndState, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF), 1)) {
-                    // only pay out if it is in state RAISED = 1
-                    mstore(0x00, 29)
-                    mstore(0x20, "Not raised or project expired")
-                    revert(0x00, 0x40)
+                if xor(and(amountAndState, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF), 1) {
+                    // only pay out if it is in state RAISED = 1                
+                    let fmp := mload(0x40)
+                    mstore(fmp, shl(229, 4594637))
+                    mstore(add(fmp, 0x04), 32)
+                    mstore(add(fmp, 0x24), 29)
+                    mstore(add(fmp, 0x44), "Not raised or project expired")
+                    revert(fmp, 0x64)
                 }
-
-                /* --- send funds --- */
 
                 /* --- send funds --- */
 
                 // no reentrancy protection needed as the whole funds are sent anyway
                 if iszero(call(0, owner, selfbalance(), 0, 0, 0, 0)) {
                     // revert if the transaction failed
-                    mstore(0x00, 29)
-                    mstore(0x20, "Can't transfer funds to owner")
-                    revert(0x00, 0x40)
+                    let fmp := mload(0x40)
+                    mstore(fmp, shl(229, 4594637))
+                    mstore(add(fmp, 0x04), 32)
+                    mstore(add(fmp, 0x24), 29)
+                    mstore(add(fmp, 0x44), "Can't transfer funds to owner")
+                    revert(fmp, 0x64)
                 }
 
                 /* --- successful transfer --- */
@@ -231,10 +196,13 @@ object "CrowdfundingSA" {
                 let helper := keccak256(0x00, 0x40) // get the slot where the callers fundings are stored
                 let amount := sload(helper)
 
-                if lt(amount, 1) {
-                    mstore(0x00, 32) // overwrite previous, now unused value
-                    mstore(0x20, "Can't pay out you haven't funded")
-                    revert(0x00, 0x40)
+                if iszero(amount) {
+                    let fmp := mload(0x40)
+                    mstore(fmp, shl(229, 4594637))
+                    mstore(add(fmp, 0x04), 32)
+                    mstore(add(fmp, 0x24), 32)
+                    mstore(add(fmp, 0x44), "Can't pay out you haven't funded")
+                    revert(fmp, 0x64)
                 }
 
                 // check for expiration
@@ -242,7 +210,7 @@ object "CrowdfundingSA" {
                 if and(gt(timestamp(), sload(2)), lt(selfbalance(), shr(128, and(amountAndState, not(0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF))))) {
                     // if the deadline and the funding goal hasn't been met, set the state to EXPIRED = 2
                     // but only if it hasn't been set before!
-                    if iszero(eq(and(amountAndState, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF), 2)) {
+                    if xor(and(amountAndState, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF), 2) {
                         // as the project has been expired, set the amountAndState with the new value for the next function
                         amountAndState := add(amountAndState, 2)
                         // update to storage
@@ -251,10 +219,13 @@ object "CrowdfundingSA" {
                 }
 
                 // If state is not EXPIRED = 2
-                if iszero(eq(and(amountAndState, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF), 2)) {
-                    mstore(0x00, 30)
-                    mstore(0x20, "The project hasn't expired yet")
-                    revert(0x00, 0x40)
+                if xor(and(amountAndState, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF), 2) {
+                    let fmp := mload(0x40)
+                    mstore(fmp, shl(229, 4594637))
+                    mstore(add(fmp, 0x04), 32)
+                    mstore(add(fmp, 0x24), 30)
+                    mstore(add(fmp, 0x44), "The project hasn't expired yet")
+                    revert(fmp, 0x64)
                 }
 
                 /* --- send funds, reentrancy prevention and check success --- */
@@ -265,7 +236,7 @@ object "CrowdfundingSA" {
                     sstore(helper, amount)
                 }
 
-                if eq(selfbalance(), 0) {
+                if iszero(selfbalance()) {
                     // if all the funds have been refunded, set the state to REFUNDED = 3
                     sstore(1, add(amountAndState, 1))
                 }
@@ -279,7 +250,7 @@ object "CrowdfundingSA" {
                 let amountAndState := sload(1)
 
                 let fmp := mload(64)
-                mstore(fmp, and(sload(0), sub(shl(160, 1), 1)))
+                mstore(fmp, sload(0))
                 mstore(add(fmp, 32), shr(128, amountAndState))
                 mstore(add(fmp, 64), and(amountAndState, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF))
                 mstore(add(fmp, 96), sload(2))

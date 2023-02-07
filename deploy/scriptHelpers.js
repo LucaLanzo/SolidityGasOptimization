@@ -81,11 +81,12 @@ function writeToCSV(data) {
         csv += array.join(",")+"\n";
     });
 
-    fileWriter.writeFile('./results/gasCosts.csv', csv, { flag: 'a+'}, err => {
+    fileWriter.writeFile('./results/globalGasCosts.csv', csv, { flag: 'a+'}, err => {
         if (err) {
           console.error(err);
+        } else {
+            console.log("Write to CSV successful");
         }
-        console.log("Write to CSV successful");
     });
 }
 

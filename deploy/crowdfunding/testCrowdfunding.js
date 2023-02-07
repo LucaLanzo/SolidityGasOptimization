@@ -42,10 +42,12 @@ async function main() {
     let transactionSol = await crowdfunding.viewProject()
     console.log(transactionSol.toString())
 
+
     // test the ASM view method
     console.log("\nCalling ASM view function ...")
     let transactionASM = await crowdfundingASM.viewProject()
     console.log(transactionASM.toString())
+
 
     // test the SA view method
     console.log("\nCalling SA view function ...")
@@ -69,6 +71,7 @@ async function main() {
     
     console.log(`.. done. Gas used: ${gasUsedSol}`)
 
+
     // test the ASM funding
     console.log("\nTesting the ASM funding function ...")
     transactionASM = await crowdfundingASMSec.fund(
@@ -79,6 +82,7 @@ async function main() {
     let gasUsedASM = receiptASM.cumulativeGasUsed;
     
     console.log(`.. done. Gas used: ${gasUsedASM}`)
+
 
     // test the SA funding
     console.log("\nTesting the SA funding function ...")
@@ -111,6 +115,7 @@ async function main() {
     
     console.log(`.. done. Gas used: ${gasUsedSol}`)
 
+
     // test the ASM payOut
     console.log("\nTesting the ASM payOut function ...")
     transactionASM = await crowdfundingASM.payOut()
@@ -119,6 +124,7 @@ async function main() {
     gasUsedASM = receiptASM.cumulativeGasUsed;
     
     console.log(`.. done. Gas used: ${gasUsedASM}`)
+
 
     // test the SA payOut
     console.log("\nTesting the SA payOut function ...")
@@ -129,6 +135,7 @@ async function main() {
     
     console.log(`.. done. Gas used: ${gasUsedSA}`)
     
+
     // calculate gas savings and save to .csv
     console.log(`\nASM saved ${calculateGasSavings(gasUsedSol, gasUsedASM)}% gas.`)
     console.log(`\nSA saved ${calculateGasSavings(gasUsedSol, gasUsedSA)}% gas.`)

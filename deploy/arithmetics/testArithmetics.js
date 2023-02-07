@@ -1,7 +1,7 @@
 // require the Hardhat Runtime Environment explicitly
 // optional, but useful for running script in standalone fashion through `node <script>`
 const hre = require("hardhat");
-const { loadContract, calculateGasSavings, writeToCSV } = require('./scriptHelpers.js');
+const { loadContract, calculateGasSavings, writeToCSV } = require('../scriptHelpers.js');
 
 
 async function main() {
@@ -23,6 +23,14 @@ async function main() {
     let gasUsedSol = receiptSol.cumulativeGasUsed;
     console.log(`... done. Gas used: ${gasUsedSol}`)
 
+    // test the Sol unchecked add method
+    console.log("\nAdd Sol unchecked ...")
+    let transactionSolUnchecked = await arithmetics.addSolUnchecked(6, 3)
+    // log gas costs
+    let receiptSolUnchecked = await transactionSolUnchecked.wait()
+    let gasUsedSolUnchecked = receiptSolUnchecked.cumulativeGasUsed;
+    console.log(`... done. Gas used: ${gasUsedSolUnchecked}`)
+
     // test the ASM add method
     console.log("\nAdd ASM ...")
     let transactionASM = await arithmeticsASM.addASM(6, 3)
@@ -42,7 +50,7 @@ async function main() {
     // calculate gas savings and save to .csv
     console.log(`\nASM saved ${calculateGasSavings(gasUsedSol, gasUsedASM)}% gas.`)
     console.log(`\nSA saved ${calculateGasSavings(gasUsedSol, gasUsedSA)}% gas.`)
-    writeToCSV([["addSol", String(gasUsedSol)], ["addASM", String(gasUsedASM)], ["addSA", String(gasUsedSA)]])
+    writeToCSV([["addSol", String(gasUsedSol)], ["addSolUnchecked", String(gasUsedSolUnchecked)], ["addASM", String(gasUsedASM)], ["addSA", String(gasUsedSA)]])
 
 
 
@@ -58,6 +66,14 @@ async function main() {
     receiptSol = await transactionSol.wait()
     gasUsedSol = receiptSol.cumulativeGasUsed;
     console.log(`... done. Gas used: ${gasUsedSol}`)
+
+    // test the Sol unchecked sub method
+    console.log("\nSub Sol unchecked ...")
+    transactionSolUnchecked = await arithmetics.subSolUnchecked(6, 3)
+    // log gas costs
+    receiptSolUnchecked = await transactionSolUnchecked.wait()
+    gasUsedSolUnchecked = receiptSolUnchecked.cumulativeGasUsed;
+    console.log(`... done. Gas used: ${gasUsedSolUnchecked}`)
 
     // test the ASM sub method
     console.log("\nSub ASM ...")
@@ -78,7 +94,7 @@ async function main() {
     // calculate gas savings and save to .csv
     console.log(`\nASM saved ${calculateGasSavings(gasUsedSol, gasUsedASM)}% gas.`)
     console.log(`\nSA saved ${calculateGasSavings(gasUsedSol, gasUsedSA)}% gas.`)
-    writeToCSV([["subSol", String(gasUsedSol)], ["subASM", String(gasUsedASM)], ["subSA", String(gasUsedSA)]])
+    writeToCSV([["subSol", String(gasUsedSol)], ["subSolUnchecked", String(gasUsedSolUnchecked)], ["subASM", String(gasUsedASM)], ["subSA", String(gasUsedSA)]])
 
 
 
@@ -95,17 +111,25 @@ async function main() {
     gasUsedSol = receiptSol.cumulativeGasUsed;
     console.log(`... done. Gas used: ${gasUsedSol}`)
 
-    // test the ASM sub method
+    // test the Sol unchecked mul method
+    console.log("\nMul Sol unchecked ...")
+    transactionSolUnchecked = await arithmetics.mulSolUnchecked(6, 3)
+    // log gas costs
+    receiptSolUnchecked = await transactionSolUnchecked.wait()
+    gasUsedSolUnchecked = receiptSolUnchecked.cumulativeGasUsed;
+    console.log(`... done. Gas used: ${gasUsedSolUnchecked}`)
+
+    // test the ASM mul method
     console.log("\nMul ASM ...")
-    transactionASM = await arithmeticsASM.subASM(6, 3)
+    transactionASM = await arithmeticsASM.mulASM(6, 3)
     // log gas costs
     receiptASM = await transactionASM.wait()
     gasUsedASM = receiptASM.cumulativeGasUsed;
     console.log(`... done. Gas used: ${gasUsedASM}`)
 
-    // test the SA sub method
+    // test the SA mul method
     console.log("\nMul SA ...")
-    transactionSA = await arithmeticsSA.subYul(6, 3)
+    transactionSA = await arithmeticsSA.mulYul(6, 3)
     // log gas costs
     receiptSA = await transactionSA.wait()
     gasUsedSA = receiptSA.cumulativeGasUsed;
@@ -114,7 +138,7 @@ async function main() {
     // calculate gas savings and save to .csv
     console.log(`\nASM saved ${calculateGasSavings(gasUsedSol, gasUsedASM)}% gas.`)
     console.log(`\nSA saved ${calculateGasSavings(gasUsedSol, gasUsedSA)}% gas.`)
-    writeToCSV([["mulSol", String(gasUsedSol)], ["mulASM", String(gasUsedASM)], ["mulSA", String(gasUsedSA)]])
+    writeToCSV([["mulSol", String(gasUsedSol)], ["mulSolUnchecked", String(gasUsedSolUnchecked)], ["mulASM", String(gasUsedASM)], ["mulSA", String(gasUsedSA)]])
     
 
 
@@ -131,6 +155,14 @@ async function main() {
     gasUsedSol = receiptSol.cumulativeGasUsed;
     console.log(`... done. Gas used: ${gasUsedSol}`)
 
+    // test the Sol unchecked div method
+    console.log("\nDiv Sol unchecked ...")
+    transactionSolUnchecked = await arithmetics.divSolUnchecked(6, 3)
+    // log gas costs
+    receiptSolUnchecked = await transactionSolUnchecked.wait()
+    gasUsedSolUnchecked = receiptSolUnchecked.cumulativeGasUsed;
+    console.log(`... done. Gas used: ${gasUsedSolUnchecked}`)
+
     // test the ASM div method
     console.log("\nDiv ASM ...")
     transactionASM = await arithmeticsASM.divASM(6, 3)
@@ -139,7 +171,7 @@ async function main() {
     gasUsedASM = receiptASM.cumulativeGasUsed;
     console.log(`... done. Gas used: ${gasUsedASM}`)
 
-    // test the SA sub method
+    // test the SA div method
     console.log("\nDiv SA ...")
     transactionSA = await arithmeticsSA.divYul(6, 3)
     // log gas costs
@@ -150,7 +182,7 @@ async function main() {
     // calculate gas savings and save to .csv
     console.log(`\nASM saved ${calculateGasSavings(gasUsedSol, gasUsedASM)}% gas.`)
     console.log(`\nSA saved ${calculateGasSavings(gasUsedSol, gasUsedSA)}% gas.`)
-    writeToCSV([["divSol", String(gasUsedSol)], ["divASM", String(gasUsedASM)], ["divSA", String(gasUsedSA)]])
+    writeToCSV([["divSol", String(gasUsedSol)], ["divSolUnchecked", String(gasUsedSolUnchecked)], ["divASM", String(gasUsedASM)], ["divSA", String(gasUsedSA)]])
     
 
 
@@ -166,6 +198,14 @@ async function main() {
     receiptSol = await transactionSol.wait()
     gasUsedSol = receiptSol.cumulativeGasUsed;
     console.log(`... done. Gas used: ${gasUsedSol}`)
+
+    // test the Sol unchecked exp method
+    console.log("\nExp Sol unchecked ...")
+    transactionSolUnchecked = await arithmetics.expSolUnchecked(6, 3)
+    // log gas costs
+    receiptSolUnchecked = await transactionSolUnchecked.wait()
+    gasUsedSolUnchecked = receiptSolUnchecked.cumulativeGasUsed;
+    console.log(`... done. Gas used: ${gasUsedSolUnchecked}`)
 
     // test the ASM exp method
     console.log("\nExp ASM ...")
@@ -186,7 +226,7 @@ async function main() {
     // calculate gas savings and save to .csv
     console.log(`\nASM saved ${calculateGasSavings(gasUsedSol, gasUsedASM)}% gas.`)
     console.log(`\nSA saved ${calculateGasSavings(gasUsedSol, gasUsedSA)}% gas.`)
-    writeToCSV([["expSol", String(gasUsedSol)], ["expASM", String(gasUsedASM)], ["expSA", String(gasUsedSA)]])
+    writeToCSV([["expSol", String(gasUsedSol)], ["expSolUnchecked", String(gasUsedSolUnchecked)], ["expASM", String(gasUsedASM)], ["expSA", String(gasUsedSA)]])
 }
 
 

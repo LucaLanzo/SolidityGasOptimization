@@ -50,7 +50,7 @@ async function main() {
     // calculate gas savings and save to .csv
     console.log(`\nASM saved ${calculateGasSavings(gasUsedSol, gasUsedASM)}% gas.`)
     console.log(`\nSA saved ${calculateGasSavings(gasUsedSol, gasUsedSA)}% gas.`)
-    writeToCSV([["addSol", String(gasUsedSol)], ["addSolUnchecked", String(gasUsedSolUnchecked)], ["addASM", String(gasUsedASM)], ["addSA", String(gasUsedSA)]])
+    writeToCSV([["addition Solidity", String(gasUsedSol)], ["addition Solidity unchecked", String(gasUsedSolUnchecked)], ["addition Assembly", String(gasUsedASM)], ["addition Standalone", String(gasUsedSA)]], "gasCostsArithmetics")
 
 
 
@@ -94,7 +94,7 @@ async function main() {
     // calculate gas savings and save to .csv
     console.log(`\nASM saved ${calculateGasSavings(gasUsedSol, gasUsedASM)}% gas.`)
     console.log(`\nSA saved ${calculateGasSavings(gasUsedSol, gasUsedSA)}% gas.`)
-    writeToCSV([["subSol", String(gasUsedSol)], ["subSolUnchecked", String(gasUsedSolUnchecked)], ["subASM", String(gasUsedASM)], ["subSA", String(gasUsedSA)]])
+    writeToCSV([["subtraction Solidity", String(gasUsedSol)], ["subtraction Solidity unchecked", String(gasUsedSolUnchecked)], ["subtraction Assembly", String(gasUsedASM)], ["subtraction Standalone", String(gasUsedSA)]], "gasCostsArithmetics")
 
 
 
@@ -138,8 +138,8 @@ async function main() {
     // calculate gas savings and save to .csv
     console.log(`\nASM saved ${calculateGasSavings(gasUsedSol, gasUsedASM)}% gas.`)
     console.log(`\nSA saved ${calculateGasSavings(gasUsedSol, gasUsedSA)}% gas.`)
-    writeToCSV([["mulSol", String(gasUsedSol)], ["mulSolUnchecked", String(gasUsedSolUnchecked)], ["mulASM", String(gasUsedASM)], ["mulSA", String(gasUsedSA)]])
-    
+    writeToCSV([["multiplication Solidity", String(gasUsedSol)], ["multiplication Solidity unchecked", String(gasUsedSolUnchecked)], ["multiplication Assembly", String(gasUsedASM)], ["multiplication Standalone", String(gasUsedSA)]], "gasCostsArithmetics")
+
 
 
 
@@ -182,8 +182,8 @@ async function main() {
     // calculate gas savings and save to .csv
     console.log(`\nASM saved ${calculateGasSavings(gasUsedSol, gasUsedASM)}% gas.`)
     console.log(`\nSA saved ${calculateGasSavings(gasUsedSol, gasUsedSA)}% gas.`)
-    writeToCSV([["divSol", String(gasUsedSol)], ["divSolUnchecked", String(gasUsedSolUnchecked)], ["divASM", String(gasUsedASM)], ["divSA", String(gasUsedSA)]])
-    
+    writeToCSV([["division Solidity", String(gasUsedSol)], ["division Solidity unchecked", String(gasUsedSolUnchecked)], ["division Assembly", String(gasUsedASM)], ["division Standalone", String(gasUsedSA)]], "gasCostsArithmetics")
+
 
 
 
@@ -227,6 +227,8 @@ async function main() {
     console.log(`\nASM saved ${calculateGasSavings(gasUsedSol, gasUsedASM)}% gas.`)
     console.log(`\nSA saved ${calculateGasSavings(gasUsedSol, gasUsedSA)}% gas.`)
     writeToCSV([["expSol", String(gasUsedSol)], ["expSolUnchecked", String(gasUsedSolUnchecked)], ["expASM", String(gasUsedASM)], ["expSA", String(gasUsedSA)]])
+    writeToCSV([["exponentiation Solidity", String(gasUsedSol)], ["exponentiation Solidity unchecked", String(gasUsedSolUnchecked)], ["exponentiation Assembly", String(gasUsedASM)], ["exponentiation Standalone", String(gasUsedSA)]], "gasCostsArithmetics")
+
 }
 
 

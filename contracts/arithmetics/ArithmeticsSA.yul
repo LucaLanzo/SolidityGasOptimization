@@ -12,19 +12,19 @@ object "ArithmeticsSA" {
         code {
             /* ----- dispatcher: calldata to function call ----- */
             switch selector()
-                case 0x993d0375 /* ----- add(uint256,uint256) ----- */ {
+                case 0x993d0375 /* ----- addYul(uint256,uint256) ----- */ {
                     addYul(calldataload(0x04), calldataload(0x24))
                 }
-                case 0x4017c1e4 {
+                case 0x4017c1e4 /* ----- subYul(uint256,uint256) ----- */ {
                     subYul(calldataload(0x04), calldataload(0x24))
                 }
-                case 0xef84dd44 {
+                case 0xef84dd44 /* ----- mulYul(uint256,uint256) ----- */ {
                     mulYul(calldataload(0x04), calldataload(0x24))
                 }
-                case 0xe4e7f88b {
+                case 0xe4e7f88b /* ----- divYul(uint256,uint256) ----- */ {
                     divYul(calldataload(0x04), calldataload(0x24))
                 }
-                case 0x41f9c19b {
+                case 0x41f9c19b /* ----- expYul(uint256,uint256) ----- */ {
                     expYul(calldataload(0x04), calldataload(0x24))
                 }
                 default {

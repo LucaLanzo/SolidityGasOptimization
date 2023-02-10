@@ -1,14 +1,15 @@
 // Custom YUL compiler
-
-var argumentsList = process.argv.slice(2)
-if (argumentsList.length == 0) { console.log("Please specify in args: '<directory>' '<filenameWithoutExtension'."); return }
-const filePath = argumentsList[0]
-const fileName = argumentsList[1]
-const fileNameWExt = argumentsList[1] + ".yul"
-
 const path = require("path");
 const fs = require("fs");
 const solc = require("solc");
+
+
+var argumentsList = process.argv.slice(2)
+if (argumentsList.length == 0) { console.log("Please specify in args: '<directory>' '<filenameWithoutExtension'."); return }
+
+const filePath = argumentsList[0]
+const fileName = argumentsList[1]
+const fileNameWExt = argumentsList[1] + ".yul"
 
 const outputPath = path.resolve(__dirname, "..", "build", `${fileName}.bytecode.json`);
 

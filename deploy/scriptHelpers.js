@@ -74,14 +74,15 @@ function calculateGasSavings(gasUsedSol, gasUsedYul) {
 }
 
 
-function writeToCSV(data) {
+function writeToCSV(data, category, fileName) {
+    // fileName for example: gasCostsArithmetics
     let csv = "";
 
     data.forEach( array => {
-        csv += array.join(",")+"\n";
+        csv += array.join(",") + `,${category}\n`;
     });
 
-    fileWriter.writeFile('./results/globalGasCosts.csv', csv, { flag: 'a+'}, err => {
+    fileWriter.writeFile('./results/' + fileName + '.csv', csv, { flag: 'a+'}, err => {
         if (err) {
           console.error(err);
         } else {

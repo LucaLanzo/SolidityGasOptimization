@@ -25,7 +25,7 @@ object "TransferFundsSA" {
 
             /* ----- transfer functions ----- */
             function transferFundsYulTransfer() {
-                if iszero(call(0, to, callvalue(), 0, 0, 0, 0)) {
+                if iszero(call(0, calldataload(0x04), callvalue(), 0, 0, 0, 0)) {
                     // revert with custom error if returned boolean is zero (0x08c379a0 -> function sig Error(string))
                     mstore(0x80, 0x08c379a0)
                     mstore(0x84, 32)
@@ -39,7 +39,7 @@ object "TransferFundsSA" {
             }
 
             function transferFundsYulSend() {
-                if iszero(call(0, to, callvalue(), 0, 0, 0, 0)) {
+                if iszero(call(0, calldataload(0x04), callvalue(), 0, 0, 0, 0)) {
                     // revert with custom error if returned boolean is zero (0x08c379a0 -> function sig Error(string))
                     mstore(0x80, 0x08c379a0)
                     mstore(0x84, 32)
@@ -54,7 +54,7 @@ object "TransferFundsSA" {
 
             function transferFundsYulCall() {
                 // as in Solidity, forward all gas
-                if iszero(call(gas(), to, callvalue(), 0, 0, 0, 0)) {
+                if iszero(call(gas(), calldataload(0x04), callvalue(), 0, 0, 0, 0)) {
                     // revert with custom error if returned boolean is zero (0x08c379a0 -> function sig Error(string))
                     mstore(0x80, 0x08c379a0)
                     mstore(0x84, 32)

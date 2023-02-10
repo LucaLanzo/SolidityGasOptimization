@@ -6,30 +6,30 @@ const { loadContract, calculateGasSavings, writeToCSV } = require('../scriptHelp
 
 async function main() {
     // load two crowdfunding contracts manually
-    const Crowdfunding = await loadContract("Crowdfunding", 1, undefined, false, true)
-    const crowdfunding = await Crowdfunding.deploy(100, 3)
+    let Crowdfunding = await loadContract("Crowdfunding", 1, undefined, false, true)
+    let crowdfunding = await Crowdfunding.deploy(100, 3)
     await crowdfunding.deployed()
     await crowdfunding.deployTransaction.wait()
     console.log(`Crowdfunding successfully deployed to ${crowdfunding.address}`);
-    const crowdfundingSec = await loadContract("Crowdfunding", 2, crowdfunding.address, false, false)
+    let crowdfundingSec = await loadContract("Crowdfunding", 2, crowdfunding.address, false, false)
     
     
     // load two ASM crowdfunding contracts manually
-    const CrowdfundingASM = await loadContract("CrowdfundingASM", 1, undefined, false, true)
-    const crowdfundingASM = await CrowdfundingASM.deploy(100, 3)
+    let CrowdfundingASM = await loadContract("CrowdfundingASM", 1, undefined, false, true)
+    let crowdfundingASM = await CrowdfundingASM.deploy(100, 3)
     await crowdfundingASM.deployed()
     await crowdfundingASM.deployTransaction.wait()
     console.log(`CrowdfundingASM successfully deployed to ${crowdfundingASM.address}`);
-    const crowdfundingASMSec = await loadContract("CrowdfundingASM", 2, crowdfundingASM.address, false, false)
+    let crowdfundingASMSec = await loadContract("CrowdfundingASM", 2, crowdfundingASM.address, false, false)
     
     
     // load two SA crowdfunding contracts manually
-    const CrowdfundingSA = await loadContract("CrowdfundingSA", 1, undefined, true, true)
-    const crowdfundingSA = await CrowdfundingSA.deploy(100, 3)
+    let CrowdfundingSA = await loadContract("CrowdfundingSA", 1, undefined, true, true)
+    let crowdfundingSA = await CrowdfundingSA.deploy(100, 3)
     await crowdfundingSA.deployed();
     await crowdfundingSA.deployTransaction.wait();
     console.log(`CrowdfundingSA successfully deployed to ${crowdfundingSA.address}`);
-    const crowdfundingSASec = await loadContract("CrowdfundingSA", 2, crowdfundingSA.address, true)
+    let crowdfundingSASec = await loadContract("CrowdfundingSA", 2, crowdfundingSA.address, true)
     
 
 
@@ -98,7 +98,7 @@ async function main() {
     // calculate gas savings and save to .csv
     console.log(`\nASM saved ${calculateGasSavings(gasUsedSol, gasUsedASM)}% gas.`)
     console.log(`\nSA saved ${calculateGasSavings(gasUsedSol, gasUsedSA)}% gas.`)
-    writeToCSV([["crowdfundingFundSol", String(gasUsedSol)], ["crowdfundingFundASM", String(gasUsedASM)], ["crowdfundingFundSA", String(gasUsedSA)]])
+    writeToCSV([["Solidity", String(gasUsedSol)], ["Inline assembly", String(gasUsedASM)], ["Standalone Yul", String(gasUsedSA)]], category="Funding", fileName="crowdfunding/gasCostsCrowdfunding")
 
 
 
@@ -139,7 +139,94 @@ async function main() {
     // calculate gas savings and save to .csv
     console.log(`\nASM saved ${calculateGasSavings(gasUsedSol, gasUsedASM)}% gas.`)
     console.log(`\nSA saved ${calculateGasSavings(gasUsedSol, gasUsedSA)}% gas.`)
-    writeToCSV([["crowdfundingPayoutSol", String(gasUsedSol)], ["crowdfundingPayoutASM", String(gasUsedASM)], ["crowdfundingPayoutSA", String(gasUsedSA)]])
+    writeToCSV([["Solidity", String(gasUsedSol)], ["Inline assembly", String(gasUsedASM)], ["Standalone Yul", String(gasUsedSA)]], category="Pay out", fileName="crowdfunding/gasCostsCrowdfunding")
+
+
+
+
+    // #################
+    // #### REFUND #####
+    // #################
+
+    // For the refund, another set of crowdfunding have to be created, as the pay out and refund functions can't be called in the
+    // same context
+    // load two crowdfunding contracts manually
+    Crowdfunding = await loadContract("Crowdfunding", 1, undefined, false, true)
+    crowdfunding = await Crowdfunding.deploy(1000000000000000, 1)
+    await crowdfunding.deployed()
+    await crowdfunding.deployTransaction.wait()
+    console.log(`Crowdfunding successfully deployed to ${crowdfunding.address}`);
+    crowdfundingSec = await loadContract("Crowdfunding", 2, crowdfunding.address, false, false)
+    
+    
+    // load two ASM crowdfunding contracts manually
+    CrowdfundingASM = await loadContract("CrowdfundingASM", 1, undefined, false, true)
+    crowdfundingASM = await CrowdfundingASM.deploy(1000000000000000, 1)
+    await crowdfundingASM.deployed()
+    await crowdfundingASM.deployTransaction.wait()
+    console.log(`CrowdfundingASM successfully deployed to ${crowdfundingASM.address}`);
+    crowdfundingASMSec = await loadContract("CrowdfundingASM", 2, crowdfundingASM.address, false, false)
+    
+    
+    // load two SA crowdfunding contracts manually
+    CrowdfundingSA = await loadContract("CrowdfundingSA", 1, undefined, true, true)
+    crowdfundingSA = await CrowdfundingSA.deploy(1000000000000000, 1)
+    await crowdfundingSA.deployed();
+    await crowdfundingSA.deployTransaction.wait();
+    console.log(`CrowdfundingSA successfully deployed to ${crowdfundingSA.address}`);
+    crowdfundingSASec = await loadContract("CrowdfundingSA", 2, crowdfundingSA.address, true)
+
+        
+
+    // fund all three contracts again
+    transactionSol = await crowdfundingSec.fund(
+        { value: hre.ethers.utils.parseEther("0.0005")}
+    )
+    transactionASM = await crowdfundingASMSec.fund(
+        { value: hre.ethers.utils.parseEther("0.0005")}
+    )
+    transactionSA = await crowdfundingSASec.fund(
+        { value: hre.ethers.utils.parseEther("0.0005")}
+    )
+
+    
+    await sleep(15) // sleep for 15 seconds until the project has expired
+
+
+    // test the Sol refund
+    console.log("\nTesting the Sol refund function ...")
+    transactionSol = await crowdfundingSec.refund()
+    // log gas costs
+    receiptSol = await transactionSol.wait()
+    gasUsedSol = receiptSol.cumulativeGasUsed;
+    
+    console.log(`.. done. Gas used: ${gasUsedSol}`)
+
+
+    // test the ASM refund
+    console.log("\nTesting the ASM refund function ...")
+    transactionASM = await crowdfundingASMSec.refund()
+    // log gas costs
+    receiptASM = await transactionASM.wait()
+    gasUsedASM = receiptASM.cumulativeGasUsed;
+    
+    console.log(`.. done. Gas used: ${gasUsedASM}`)
+
+
+    // test the SA refund
+    console.log("\nTesting the SA refund function ...")
+    transactionSA = await crowdfundingSASec.refund()
+    // log gas costs
+    receiptSA = await transactionSA.wait()
+    gasUsedSA = receiptSA.cumulativeGasUsed;
+    
+    console.log(`.. done. Gas used: ${gasUsedSA}`)
+    
+
+    // calculate gas savings and save to .csv
+    console.log(`\nASM saved ${calculateGasSavings(gasUsedSol, gasUsedASM)}% gas.`)
+    console.log(`\nSA saved ${calculateGasSavings(gasUsedSol, gasUsedSA)}% gas.`)
+    writeToCSV([["Solidity", String(gasUsedSol)], ["Inline assembly", String(gasUsedASM)], ["Standalone Yul", String(gasUsedSA)]], category="Refund", fileName="crowdfunding/gasCostsCrowdfunding")
 }
 
 
@@ -147,3 +234,9 @@ main().catch((error) => {
     console.error(error);
     process.exitCode = 1;
 });
+
+
+function sleep(seconds) {
+    // sleep for set amount of time
+    return new Promise(resolve => setTimeout(resolve, seconds*1000));
+}

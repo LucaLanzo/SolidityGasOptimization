@@ -1,4 +1,4 @@
-# Solidity Inline Assembly Gas Savings
+# Solidity to Yul transformation - Possible gas Savings
 
 This project is part of a Bachelor's Thesis which aims to find ways to optimize the gas costs for smart contracts on the Ethereum blockchain. 
 The main aspect is the usage of Solidity's inline assembly feature, which gives a programmer the ability to program in the close-to-EVM-bytecode low-level language Yul.
@@ -8,11 +8,11 @@ Multiple basic operations are translated and compared from Solidity to Yul and l
   
 # Start the project
 
-## Firstly, create a local blockchain
-### - Infura is used to fork mainnet
-### - A hardhat node should be run locally where ...
-### - ... the keys are the same on every start
-### - ... other configurations are set in the hardhat.config.js
+### Firstly, create a local blockchain
+#### - Infura is used to fork mainnet
+#### - A hardhat node should be run locally where ...
+#### - ... the keys are the same on every start
+#### - ... other configurations are set in the hardhat.config.js
 ```
 npx hardhat compile // or 'npm run c'
 npx hardhat node // or 'npm run s'
@@ -21,13 +21,22 @@ npx hardhat node // or 'npm run s'
 <br>
 <br> 
 
-### Optionally you can compile directly to Yul:
+#### Optionally you can compile directly to Yul:
 ```
 solc --ir-optimized --optimize contracts/OnlyOwnerTestSolidity.sol > .\contracts\OnlyOwnerTestYul.yul
 ``` 
 
 <br>
 <br>
+
+#### It is also possible to optimize self-written Yul contracts during compilation:
+```
+solc --strict-assembly --optimize --optimize-runs 1500 .\contracts\arithmetics\ArithmeticsSA.yul > .\contracts\arithmetics\ArithmeticsSAOutput.bytecode.json
+``` 
+
+<br>
+<br>
+
 
 ### More useful hardhat commands:
 ```shell

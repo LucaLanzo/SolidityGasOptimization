@@ -96,12 +96,14 @@ object "CrowdfundingSA" {
 
                 // check for expiration()
                 let amountAndState := sload(1)
-                if and(gt(timestamp(), sload(2)), lt(selfbalance(), shr(128, and(amountAndState, not(0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF))))) {
+                let amountToRaiseVar := shr(128, amountAndState)
+                if and(gt(timestamp(), sload(2)), lt(selfbalance(), amountToRaiseVar)) {
                     // if the deadline and the funding goal hasn't been met, set the state to EXPIRED = 2
                     // but only if it hasn't been set before!
                     if iszero(eq(and(amountAndState, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF), 2)) {
                         // as the project has been expired, set the amountAndState with the new value for the next function
                         amountAndState := add(amountAndState, 2)
+                        // no need to sstore this updated value as it will be reverted in the next step anyway
                     }
                 }
 
@@ -128,10 +130,9 @@ object "CrowdfundingSA" {
                 /* --- post fund state checking --- */
 
                 helper := selfbalance() // reuse old variables to save gas
-                amountAndState := sload(1)
 
                 // if (balance >= amount) -> no greaterthanequals in Sol -> if (balance > amount-1)
-                if gt(helper, sub(shr(128, and(amountAndState, not(0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF))), 1)) {
+                if gt(helper, sub(amountToRaiseVar, 1)) {
                     // if the goal has been met, set the state to RAISED = 1
                     sstore(1, add(amountAndState, 1))
                 }
@@ -194,9 +195,9 @@ object "CrowdfundingSA" {
                 mstore(0x00, funder)
                 mstore(0x20, 4) // fundings.slot = 4, fixed. Depends on the order of storage variables
                 let helper := keccak256(0x00, 0x40) // get the slot where the callers fundings are stored
-                let amount := sload(helper)
+                let individualAmountPaid := sload(helper)
 
-                if iszero(amount) {
+                if iszero(individualAmountPaid) {
                     mstore(0x80, 0x08c379a0)
                     mstore(0x84, 32)
                     mstore(0xA4, 32)
@@ -207,7 +208,7 @@ object "CrowdfundingSA" {
 
                 // check for expiration
                 let amountAndState := sload(1)
-                if and(gt(timestamp(), sload(2)), lt(selfbalance(), shr(128, and(amountAndState, not(0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF))))) {
+                if and(gt(timestamp(), sload(2)), lt(selfbalance(), shr(128, amountAndState))) {
                     // if the deadline and the funding goal hasn't been met, set the state to EXPIRED = 2
                     // but only if it hasn't been set before!
                     if xor(and(amountAndState, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF), 2) {
@@ -231,9 +232,9 @@ object "CrowdfundingSA" {
                 /* --- send funds, reentrancy prevention and check success --- */
                 sstore(helper, 0) // set the funds to zero
 
-                if iszero(call(0, funder, amount, 0, 0, 0, 0)) {
+                if iszero(call(0, funder, individualAmountPaid, 0, 0, 0, 0)) {
                     // revert if the transaction failed
-                    sstore(helper, amount)
+                    sstore(helper, individualAmountPaid)
                 }
 
                 if iszero(selfbalance()) {

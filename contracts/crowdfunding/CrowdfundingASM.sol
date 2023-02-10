@@ -86,14 +86,16 @@ contract CrowdfundingASM {
             }
 
             // impossible to call local Solidity functions from assembly: checkForExpiration() implemented here
-            // an AND-Mask of 16 bytes yields the left 16 bytes of amountAndState which is -> amount
+            // a shift of 128 bits (16 bytes) of amountAndState equals the higher bit amount
             let amountAndState := sload(1)
-            if and(gt(timestamp(), sload(2)), lt(selfbalance(), shr(128, and(amountAndState, not(0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF))))) {
+            let amountToRaiseVar := shr(128, amountAndState)
+            if and(gt(timestamp(), sload(2)), lt(selfbalance(), amountToRaiseVar)) {
                 // if the deadline and the funding goal hasn't been met, set the state to EXPIRED = 2
                 // but only if it hasn't been set before!
-                if iszero(eq(and(amountAndState, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF), 2)) {
+                if xor(and(amountAndState, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF), 2) {
                     // as the project has been expired, set the amountAndState with the new value for the next function
                     amountAndState := add(amountAndState, 2)
+                    // no need to sstore this updated value as it will be reverted in the next step anyway
                 }
             }
 
@@ -125,11 +127,10 @@ contract CrowdfundingASM {
             /* --- post fund state checking --- */
 
             helper := selfbalance() // reuse old variables to save gas
-            amountAndState := sload(1)
 
             // as there is no greater than equal, 1 has to be subtracted from the amount
-            // it turns balance >= amount to balance > amount-1, which in turn saves multiple opcodes of or(gt(...), eq(...))
-            if gt(helper, sub(shr(128, and(amountAndState, not(0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF))), 1)) {
+            // it turns "balance >= amount" to "balance > amount-1", which in turn saves multiple opcodes of or(gt(...), eq(...))
+            if gt(helper, sub(amountToRaiseVar, 1)) {
                 // if the goal has been met, set the state to RAISED = 1
                 sstore(1, add(amountAndState, 1))
             }
@@ -154,6 +155,7 @@ contract CrowdfundingASM {
             }
 
             let amountAndState := sload(1)
+            // xor(amountAndState, 1) == amountAndState != 1
             if xor(and(amountAndState, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF), 1) {
                 // only pay out if it is in state RAISED = 1
                 mstore(0x80, 0x08c379a0)
@@ -191,13 +193,14 @@ contract CrowdfundingASM {
             /* --- security checks --- */
             let funder := caller()
             
-            // check if the caller has even funded (includes an owner entrancy prevention as well)
+            // check if the caller has even funded 
+            // includes an owner entrancy prevention as well, as the owner can not have funded his own project in the first place
             mstore(0x00, funder)
             mstore(0x20, 4)
             let helper := keccak256(0x00, 0x40) // get the slot where the callers fundings are stored
-            let amount := sload(helper)
+            let individualAmountPaid := sload(helper)
 
-            if iszero(amount) {
+            if iszero(individualAmountPaid) {
                 mstore(0x80, 0x08c379a0)
                 mstore(0x84, 32)
                 mstore(0xA4, 32)
@@ -208,14 +211,12 @@ contract CrowdfundingASM {
 
             // check for expiration
             let amountAndState := sload(1)
-            if and(gt(timestamp(), sload(2)), lt(selfbalance(), shr(128, and(amountAndState, not(0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF))))) {
+            if and(gt(timestamp(), sload(2)), lt(selfbalance(), shr(128, amountAndState))) {
                 // if the deadline and the funding goal hasn't been met, set the state to EXPIRED = 2
                 // but only if it hasn't been set before!
                 if xor(and(amountAndState, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF), 2) {
                     // as the project has been expired, set the amountAndState with the new value for the next function
                     amountAndState := add(amountAndState, 2)
-                    // update to storage
-                    sstore(1, amountAndState)
                 }
             }
 
@@ -232,9 +233,9 @@ contract CrowdfundingASM {
             /* --- send funds, reentrancy prevention and check success --- */
             sstore(helper, 0) // set the funds to zero
 
-            if iszero(call(0, funder, amount, 0, 0, 0, 0)) {
+            if iszero(call(0, funder, individualAmountPaid, 0, 0, 0, 0)) {
                 // revert if the transaction failed
-                sstore(helper, amount)
+                sstore(helper, individualAmountPaid)
             }
 
             if iszero(selfbalance()) {

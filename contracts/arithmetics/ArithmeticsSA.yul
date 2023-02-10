@@ -4,8 +4,9 @@ object "ArithmeticsSA" {
     /* ----- contract deployment ----- */
     code {
         // Deploy the contract
-        datacopy(0, dataoffset("runtime"), datasize("runtime"))
-        return(0, datasize("runtime"))
+        let ds := datasize("runtime")
+        datacopy(0, dataoffset("runtime"), ds)
+        return(0, ds)
     }
 
     object "runtime" {

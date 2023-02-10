@@ -18,7 +18,7 @@ module.exports = {
             accounts: {
                 mnemonic: "exhibit air raven loop into fetch license iron manual surround hold east",
                 count: 2,
-                accountsBalance: "1000000000000000000"
+                accountsBalance: "1000000000000000000" // 1 ether
             },
             loggingEnabled: true // true by default on standalone hardhat node
         }
@@ -28,8 +28,8 @@ module.exports = {
         version: '0.8.17',
         settings: {
             optimizer: {
-                enabled: true,
-                runs: 100000,
+                enabled: false,
+                runs: 1500,
             },
         },
     },

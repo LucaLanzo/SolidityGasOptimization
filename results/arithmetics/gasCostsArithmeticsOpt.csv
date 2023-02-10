@@ -1,0 +1,21 @@
+Implementation,gasUsage,function
+Solidity,21907,Addition
+Solidity unchecked,21818,Addition
+Inline Assembly,21789,Addition
+Standalone Yul,21421,Addition
+Solidity,21906,Subtraction
+Solidity unchecked,21798,Subtraction
+Inline Assembly,21768,Subtraction
+Standalone Yul,21468,Subtraction
+Solidity,21962,Multiplication
+Solidity unchecked,21818,Multiplication
+Inline Assembly,21769,Multiplication
+Standalone Yul,21492,Multiplication
+Solidity,21953,Division
+Solidity unchecked,21855,Division
+Inline Assembly,21747,Division
+Standalone Yul,21514,Division
+Solidity,22200,Exponentiation
+Solidity unchecked,21892,Exponentiation
+Inline Assembly,21803,Exponentiation
+Standalone Yul,21586,Exponentiation

@@ -5,11 +5,11 @@ pragma solidity ^0.8.17;
 contract Crowdfunding {
     enum ProjectState { RAISING, RAISED, EXPIRED, REFUNDED, PAID }
     
-    address payable private creator; // to pay out    
-    uint128 private amountToRaise;
-    ProjectState private state;
+    address payable private creator; // to pay out
     uint256 private deadline;
     uint256 private startedAt;
+    ProjectState private state;             // /   type pack state   \
+    uint128 private amountToRaise;          // \  and amountToRaise  /
 
     mapping (address => uint) public fundings;
 

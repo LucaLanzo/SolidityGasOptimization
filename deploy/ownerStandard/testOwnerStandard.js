@@ -7,9 +7,9 @@ const { loadContract, calculateGasSavings, writeToCSV } = require('../scriptHelp
 async function main() {
     
     // load the contracts
-    const onlyOwnerSol = await loadContract("OnlyOwnerSol", 0, undefined, false, false);
-    const onlyOwnerASM = await loadContract("OnlyOwnerASM", 0, undefined, false, false);
-    const onlyOwnerSA = await loadContract("OnlyOwnerSA", 0, undefined, true, false)
+    const onlyOwnerSol = await loadContract("OnlyOwnerSol", 1, undefined, false, false);
+    const onlyOwnerASM = await loadContract("OnlyOwnerASM", 1, undefined, false, false);
+    const onlyOwnerSA = await loadContract("OnlyOwnerSA", 1, undefined, true, false)
     
     
     // ###############
@@ -49,7 +49,7 @@ async function main() {
     // calculate gas savings and save to .csv
     console.log(`\nASM saved ${calculateGasSavings(gasUsedSol, gasUsedASM)}% gas.`)
     console.log(`\nSA saved ${calculateGasSavings(gasUsedSol, gasUsedSA)}% gas.`)
-    writeToCSV([["onlyOwnerSol", String(gasUsedSol)], ["onlyOwnerASM", String(gasUsedASM)], ["onlyOwnerSA", String(gasUsedSA)]])
+    writeToCSV([["Solidity", String(gasUsedSol)], ["Inline assembly", String(gasUsedASM)], ["Standalone Yul", String(gasUsedSA)]], category="none", filename="ownerStandard/gasCostsOwnerStandard")
 }
 
 

@@ -1,0 +1,10 @@
+Implementation,gasUsage,function
+Solidity,53505,Funding
+Inline assembly,52770,Funding
+Standalone Yul,52716,Funding
+Solidity,35932,Pay out
+Inline assembly,35224,Pay out
+Standalone Yul,35189,Pay out
+Solidity,36949,Refund
+Inline assembly,35603,Refund
+Standalone Yul,35697,Refund

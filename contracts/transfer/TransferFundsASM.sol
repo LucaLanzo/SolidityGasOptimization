@@ -54,6 +54,7 @@ contract TransferFundsASM {
 
     // Not part of the bachelor's thesis
     // Just an ingenious and especially safe way to send funds (although not cheap)
+    /*
     function transferFundsASMForce(address payable to) public payable {
         assembly {
             mstore(0x00, to)    // Store the address in scratch space.
@@ -69,4 +70,5 @@ contract TransferFundsASM {
     function erc20TokenTransfer() public {
         
     }
+    */
 }

@@ -1,0 +1,10 @@
+Implementation,gasUsage,function
+Solidity,31288,transfer
+Inline assembly,31170,transfer
+Standalone Yul,30862,transfer
+Solidity,31268,send
+Inline assembly,31214,send
+Standalone Yul,30884,send
+Solidity,31452,call
+Inline assembly,31191,call
+Standalone Yul,30905,call

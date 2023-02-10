@@ -6,9 +6,9 @@ const { loadContract, calculateGasSavings, writeToCSV } = require('../scriptHelp
 
 async function main() {
     // load the contracts
-    const arithmetics = await loadContract("Arithmetics", 0, undefined, false, false);
-    const arithmeticsASM = await loadContract("ArithmeticsASM", 0, undefined, false, false);
-    const arithmeticsSA = await loadContract("ArithmeticsSA", 0, undefined, true, false)
+    const arithmetics = await loadContract("Arithmetics", 1, undefined, false, false);
+    const arithmeticsASM = await loadContract("ArithmeticsASM", 1, undefined, false, false);
+    const arithmeticsSA = await loadContract("ArithmeticsSA", 1, undefined, true, false)
 
 
     // ###################
@@ -50,7 +50,7 @@ async function main() {
     // calculate gas savings and save to .csv
     console.log(`\nASM saved ${calculateGasSavings(gasUsedSol, gasUsedASM)}% gas.`)
     console.log(`\nSA saved ${calculateGasSavings(gasUsedSol, gasUsedSA)}% gas.`)
-    writeToCSV([["addition Solidity", String(gasUsedSol)], ["addition Solidity unchecked", String(gasUsedSolUnchecked)], ["addition Assembly", String(gasUsedASM)], ["addition Standalone", String(gasUsedSA)]], "gasCostsArithmetics")
+    writeToCSV([["Solidity", String(gasUsedSol)], ["Solidity unchecked", String(gasUsedSolUnchecked)], ["Inline assembly", String(gasUsedASM)], ["Standalone Yul", String(gasUsedSA)]], category="Addition", fileName="arithmetics/gasCostsArithmetics")
 
 
 
@@ -94,7 +94,7 @@ async function main() {
     // calculate gas savings and save to .csv
     console.log(`\nASM saved ${calculateGasSavings(gasUsedSol, gasUsedASM)}% gas.`)
     console.log(`\nSA saved ${calculateGasSavings(gasUsedSol, gasUsedSA)}% gas.`)
-    writeToCSV([["subtraction Solidity", String(gasUsedSol)], ["subtraction Solidity unchecked", String(gasUsedSolUnchecked)], ["subtraction Assembly", String(gasUsedASM)], ["subtraction Standalone", String(gasUsedSA)]], "gasCostsArithmetics")
+    writeToCSV([["Solidity", String(gasUsedSol)], ["Solidity unchecked", String(gasUsedSolUnchecked)], ["Inline assembly", String(gasUsedASM)], ["Standalone Yul", String(gasUsedSA)]], category="Subtraction", fileName="arithmetics/gasCostsArithmetics")
 
 
 
@@ -138,7 +138,7 @@ async function main() {
     // calculate gas savings and save to .csv
     console.log(`\nASM saved ${calculateGasSavings(gasUsedSol, gasUsedASM)}% gas.`)
     console.log(`\nSA saved ${calculateGasSavings(gasUsedSol, gasUsedSA)}% gas.`)
-    writeToCSV([["multiplication Solidity", String(gasUsedSol)], ["multiplication Solidity unchecked", String(gasUsedSolUnchecked)], ["multiplication Assembly", String(gasUsedASM)], ["multiplication Standalone", String(gasUsedSA)]], "gasCostsArithmetics")
+    writeToCSV([["Solidity", String(gasUsedSol)], ["Solidity unchecked", String(gasUsedSolUnchecked)], ["Inline assembly", String(gasUsedASM)], ["Standalone Yul", String(gasUsedSA)]], category="Multiplication", fileName="arithmetics/gasCostsArithmetics")
 
 
 
@@ -182,7 +182,7 @@ async function main() {
     // calculate gas savings and save to .csv
     console.log(`\nASM saved ${calculateGasSavings(gasUsedSol, gasUsedASM)}% gas.`)
     console.log(`\nSA saved ${calculateGasSavings(gasUsedSol, gasUsedSA)}% gas.`)
-    writeToCSV([["division Solidity", String(gasUsedSol)], ["division Solidity unchecked", String(gasUsedSolUnchecked)], ["division Assembly", String(gasUsedASM)], ["division Standalone", String(gasUsedSA)]], "gasCostsArithmetics")
+    writeToCSV([["Solidity", String(gasUsedSol)], ["Solidity unchecked", String(gasUsedSolUnchecked)], ["Inline assembly", String(gasUsedASM)], ["Standalone Yul", String(gasUsedSA)]], category="Division", fileName="arithmetics/gasCostsArithmetics")
 
 
 
@@ -226,8 +226,7 @@ async function main() {
     // calculate gas savings and save to .csv
     console.log(`\nASM saved ${calculateGasSavings(gasUsedSol, gasUsedASM)}% gas.`)
     console.log(`\nSA saved ${calculateGasSavings(gasUsedSol, gasUsedSA)}% gas.`)
-    writeToCSV([["expSol", String(gasUsedSol)], ["expSolUnchecked", String(gasUsedSolUnchecked)], ["expASM", String(gasUsedASM)], ["expSA", String(gasUsedSA)]])
-    writeToCSV([["exponentiation Solidity", String(gasUsedSol)], ["exponentiation Solidity unchecked", String(gasUsedSolUnchecked)], ["exponentiation Assembly", String(gasUsedASM)], ["exponentiation Standalone", String(gasUsedSA)]], "gasCostsArithmetics")
+    writeToCSV([["Solidity", String(gasUsedSol)], ["Solidity unchecked", String(gasUsedSolUnchecked)], ["Inline assembly", String(gasUsedASM)], ["Standalone Yul", String(gasUsedSA)]], category="Exponentiation", fileName="arithmetics/gasCostsArithmetics")
 
 }
 

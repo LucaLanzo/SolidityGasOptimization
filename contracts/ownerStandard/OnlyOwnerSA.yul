@@ -9,7 +9,7 @@ object "OnlyOwnerSA" {
 
     object "runtime" {
         code {
-            if eq(0x682ef68d, shr(224, calldataload(0))) /* --- ownerTest --- */ {
+            if eq(0x682ef68d, shr(224, calldataload(0))) /* --- ownerTest() --- */ {
                 
                 if xor(caller(), sload(0)) {
                     // the caller is not the stored owner, revert if xor() == 1

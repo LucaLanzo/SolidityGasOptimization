@@ -1,0 +1,4 @@
+Implementation,gasUsage,function
+Solidity,23450,onlyOwner
+Inline assembly,23311,onlyOwner
+Standalone Yul,23226,onlyOwner

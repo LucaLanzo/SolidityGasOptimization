@@ -96,8 +96,32 @@ plt.show()
 
 # Transfer ERC20
 
+gasCosts = pd.read_csv('./transferToken/gasCostsTokenTransfer.csv')
+
+sns.barplot(data=gasCosts, x="function", y="gasUsage", hue="Implementation", palette="pastel")
+
+plt.title("ERC-20 Token Transfer")
+plt.ylabel("gas units used")
+plt.xlabel("type of function")
+
+plt.ylim([28000, 55000])
+
+plt.show()
+
 
 # Transfer ERC20 optimized
+
+gasCosts = pd.read_csv('./transferToken/gasCostsTokenTransferOpt.csv')
+
+sns.barplot(data=gasCosts, x="function", y="gasUsage", hue="Implementation", palette="pastel")
+
+plt.title("ERC-20 Token Transfer optimized (1500 runs)")
+plt.ylabel("gas units used")
+plt.xlabel("type of function")
+
+plt.ylim([28000, 55000])
+
+plt.show()
 
 
 

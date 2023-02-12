@@ -214,8 +214,6 @@ object "CrowdfundingSA" {
                     if xor(and(amountAndState, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF), 2) {
                         // as the project has been expired, set the amountAndState with the new value for the next function
                         amountAndState := add(amountAndState, 2)
-                        // update to storage
-                        sstore(1, amountAndState)
                     }
                 }
 

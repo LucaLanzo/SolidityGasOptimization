@@ -2,6 +2,10 @@
 pragma solidity ^0.8.17;
 
 contract TransferToken {
+    event Approval(address indexed owner, address indexed spender, uint256 value);
+    event Transfer(address indexed from, address indexed to, uint256 value);
+
+
     string public constant name = "transferToken";
     string public constant symbol = "TFT";
     uint8 public constant decimals = 18;  
@@ -32,6 +36,9 @@ contract TransferToken {
     function approve(address spender, uint value) public returns (bool) {
         allowances[msg.sender][spender] = value;
 
+        emit Approval(msg.sender, spender, value);
+
+        // revert if impossible, return true if the balances have been set
         return true;
     }
 
@@ -40,7 +47,10 @@ contract TransferToken {
 
         balances[msg.sender] -= value;
         balances[to] += value;
+        
+        emit Transfer(msg.sender, to, value);
 
+        // revert if impossible, return true if the balances have been set
         return true;
     }
 
@@ -52,6 +62,9 @@ contract TransferToken {
         allowances[from][msg.sender] -= value;
         balances[to] += value;
 
+        emit Transfer(from, to, value);
+
+        // revert if impossible, return true if the balances have been set
         return true;
     }
 }

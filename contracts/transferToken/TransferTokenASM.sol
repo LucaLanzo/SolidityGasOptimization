@@ -72,7 +72,8 @@ contract TransferTokenASM {
         // return true;
 
         assembly {
-            mstore(0x00, caller())
+            let callerVar := caller()
+            mstore(0x00, callerVar)
             mstore(0x20, 5)
             
             let slotForSpender := keccak256(0x00, 0x40)
@@ -81,7 +82,15 @@ contract TransferTokenASM {
 
             // load allowance from slot of owner -> spender
             sstore(keccak256(0x00, 0x40), value)
+
+            // store the value in memory for the log function
+            mstore(0x00, value)
+            log3(0x00, 0x20, 0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925, callerVar, spender)
             
+            // store the value in memory for the log function
+            mstore(0x00, value)
+            log3(0x00, 0x20, 0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925, callerVar, spender)
+                
             mstore(0x00, 1)         // boolean 1
             return(0x00, 0x20)
         }
@@ -99,7 +108,8 @@ contract TransferTokenASM {
 
         assembly {
             // get balance of caller
-            mstore(0x00, caller())
+            let callerVar := caller()
+            mstore(0x00, callerVar)
             mstore(0x20, 4)
             let balanceSlot := keccak256(0x00, 0x40)
             let balanceSender := sload(balanceSlot)
@@ -122,6 +132,11 @@ contract TransferTokenASM {
             mstore(0x20, 4)
             balanceSlot := keccak256(0x00, 0x40)
             sstore(balanceSlot, add(sload(balanceSlot), value))
+            
+            // store the value in memory for the log function
+            mstore(0x00, value)
+            log3(0x00, 0x20, 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef, callerVar, to)
+
 
             mstore(0x00, 1)
             return(0x00, 0x20)
@@ -162,7 +177,8 @@ contract TransferTokenASM {
             mstore(0x20, 5)
             let allowanceSlotFromFrom := keccak256(0x00, 0x40)
 
-            mstore(0x00, caller())
+            let callerVar := caller()
+            mstore(0x00, callerVar)
             mstore(0x20, allowanceSlotFromFrom)
             let allowanceSlotForCaller := keccak256(0x00, 0x40)         // save for later
             let allowanceForCaller := sload(allowanceSlotForCaller)     // save for later
@@ -188,6 +204,10 @@ contract TransferTokenASM {
             mstore(0x20, 4)
             balanceSlot := keccak256(0x00, 0x40)
             sstore(balanceSlot, add(sload(balanceSlot), value))         // overflow!
+
+            // store the value in memory for the log function
+            mstore(0x00, value)
+            log3(0x00, 0x20, 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef, callerVar, to)
 
             mstore(0x00, 1)
             return(0x00, 0x20)

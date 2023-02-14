@@ -119,7 +119,8 @@ object "TransferTokenSA" {
                 mstore(0x20, 2)
                 let allowanceSlotFromFrom := keccak256(0x00, 0x40)
 
-                mstore(0x00, caller())
+                let callerVar := caller()
+                mstore(0x00, callerVar)
                 mstore(0x20, allowanceSlotFromFrom)
                 let allowanceSlotForCaller := keccak256(0x00, 0x40)         // save for later
                 let allowanceForCaller := sload(allowanceSlotForCaller)     // save for later
@@ -146,13 +147,18 @@ object "TransferTokenSA" {
                 balanceSlot := keccak256(0x00, 0x40)
                 sstore(balanceSlot, add(sload(balanceSlot), value))         // overflow!
 
+                // store the value in memory for the log function
+                mstore(0x00, value)
+                log3(0x00, 0x20, 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef, callerVar, to)
+
                 mstore(0x00, 1)
                 return(0x00, 0x20)
             }
 
             function transfer(to, value) {
                 // get balance of caller
-                mstore(0x00, caller())
+                let callerVar := caller()
+                mstore(0x00, callerVar)
                 mstore(0x20, 1)
                 let balanceSlot := keccak256(0x00, 0x40)
                 let balanceSender := sload(balanceSlot)
@@ -176,12 +182,17 @@ object "TransferTokenSA" {
                 balanceSlot := keccak256(0x00, 0x40)
                 sstore(balanceSlot, add(sload(balanceSlot), value))
 
+                // store the value in memory for the log function
+                mstore(0x00, value)
+                log3(0x00, 0x20, 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef, callerVar, to)
+
                 mstore(0x00, 1)
                 return(0x00, 0x20)
             }
 
             function approve(spender, value) {
-                mstore(0x00, caller())
+                let callerVar := caller()
+                mstore(0x00, callerVar)
                 mstore(0x20, 2)
                 
                 let slotForSpender := keccak256(0x00, 0x40)
@@ -191,6 +202,10 @@ object "TransferTokenSA" {
                 // load allowance from slot of owner -> spender
                 sstore(keccak256(0x00, 0x40), value)
                 
+                // store the value in memory for the log function
+                mstore(0x00, value)
+                log3(0x00, 0x20, 0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925, callerVar, spender)
+
                 mstore(0x00, 1)         // boolean 1
                 return(0x00, 0x20)
             }

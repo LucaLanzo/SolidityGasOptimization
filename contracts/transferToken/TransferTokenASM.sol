@@ -87,10 +87,6 @@ contract TransferTokenASM {
             mstore(0x00, value)
             log3(0x00, 0x20, 0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925, callerVar, spender)
             
-            // store the value in memory for the log function
-            mstore(0x00, value)
-            log3(0x00, 0x20, 0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925, callerVar, spender)
-                
             mstore(0x00, 1)         // boolean 1
             return(0x00, 0x20)
         }

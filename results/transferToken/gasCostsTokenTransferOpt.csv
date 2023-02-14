@@ -1,10 +1,10 @@
 Implementation,gasUsage,function
-Solidity,49672,transferToken
-Inline assembly,49226,transferToken
-Standalone Yul,48961,transferToken
-Solidity,44262,approve
-Inline assembly,44151,approve
-Standalone Yul,43940,approve
-Solidity,30920,transferFromToken
-Inline assembly,30223,transferFromToken
-Standalone Yul,29896,transferFromToken
+Solidity,51515,transferToken
+Inline assembly,51014,transferToken
+Standalone Yul,50773,transferToken
+Solidity,46095,approve
+Inline assembly,45936,approve
+Standalone Yul,45713,approve
+Solidity,32410,transferFromToken
+Inline assembly,31654,transferFromToken
+Standalone Yul,31341,transferFromToken

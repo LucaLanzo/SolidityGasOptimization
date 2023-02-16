@@ -30,6 +30,12 @@ var input = {
             '*': {
                 '*': [ "evm.bytecode" ]
             }
+        },
+        optimizer: { 
+            "enabled": true, 
+            "details": { 
+                "yul": true 
+            } 
         }
     }
 };

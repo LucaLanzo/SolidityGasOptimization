@@ -5,7 +5,6 @@ contract TransferToken {
     event Approval(address indexed owner, address indexed spender, uint256 value);
     event Transfer(address indexed from, address indexed to, uint256 value);
 
-
     string public constant name = "transferToken";
     string public constant symbol = "TFT";
     uint8 public constant decimals = 18;  
@@ -19,7 +18,6 @@ contract TransferToken {
 	    totalSupply_ = total;
 	    balances[msg.sender] = totalSupply_;
     }
-
 
     function totalSupply() public view returns (uint256) {
 	    return totalSupply_;

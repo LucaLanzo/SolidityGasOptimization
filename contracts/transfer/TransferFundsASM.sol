@@ -8,12 +8,9 @@ contract TransferFundsASM {
         assembly {            
             if iszero(call(0, to, callvalue(), 0, 0, 0, 0)) {
                 // throw an error upon failure
-                let pos := mload(64)
-                returndatacopy(pos, 0, returndatasize())
-                revert(pos, returndatasize())
-            }
-
-            return(0, 0)      
+                returndatacopy(0x80, 0, returndatasize())
+                revert(0x80, returndatasize())
+            }  
         }
     }
 
@@ -28,9 +25,7 @@ contract TransferFundsASM {
                 mstore(0xC4, "Send failed")
             
                 revert(0x80, 100)
-            }
-
-            return(0, 0)        
+            }       
         }
     }
 
@@ -47,8 +42,6 @@ contract TransferFundsASM {
             
                 revert(0x80, 100)
             }
-            
-            return(0, 0)
         }
     }
 

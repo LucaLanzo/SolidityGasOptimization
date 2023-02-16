@@ -26,13 +26,9 @@ object "TransferFundsSA" {
             /* ----- transfer functions ----- */
             function transferFundsYulTransfer() {
                 if iszero(call(0, calldataload(0x04), callvalue(), 0, 0, 0, 0)) {
-                    // revert with custom error if returned boolean is zero (0x08c379a0 -> function sig Error(string))
-                    mstore(0x80, 0x08c379a0)
-                    mstore(0x84, 32)
-                    mstore(0xA4, 11)
-                    mstore(0xC4, "Send failed")
-                
-                    revert(0x80, 100)
+                    // throw an error upon failure
+                    returndatacopy(0x80, 0, returndatasize())
+                    revert(0x80, returndatasize())
                 }
 
                 return(0, 0)      

@@ -32,7 +32,7 @@ var input = {
             }
         },
         optimizer: { 
-            "enabled": true, 
+            "enabled": false, 
             "details": { 
                 "yul": true 
             } 
